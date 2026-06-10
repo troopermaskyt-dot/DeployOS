@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DeployOS — Hosting Platform</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: #0A0A0F; color: #F8F8FF; min-height: 100vh; }
+  :root {
+    --purple: #7C3AED; --purple-light: #A855F7; --purple-dark: #5B21B6;
+    --bg: #0A0A0F; --bg2: #12121A; --bg3: #1A1A26; --bg4: #22223A;
+    --border: rgba(124,58,237,0.18); --border2: rgba(255,255,255,0.08);
+    --text: #F8F8FF; --text2: #A0A0C0; --text3: #6060A0;
+    --green: #10B981; --red: #EF4444; --amber: #F59E0B;
+    --mono: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+
+  /* AUTH */
+  #auth-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; }
+  .auth-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px; padding: 2.5rem; width: 100%; max-width: 400px; }
+  .logo { display: flex; align-items: center; gap: 10px; margin-bottom: 2rem; justify-content: center; }
+  .logo-icon { width: 36px; height: 36px; background: var(--purple); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: white; }
+  .logo-name { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  .auth-title { font-size: 20px; font-weight: 600; text-align: center; margin-bottom: 0.5rem; }
+  .auth-sub { color: var(--text2); font-size: 14px; text-align: center; margin-bottom: 1.5rem; }
+  .form-group { margin-bottom: 1rem; }
+  .form-label { font-size: 13px; color: var(--text2); margin-bottom: 6px; display: block; }
+  .form-input { width: 100%; padding: 10px 14px; background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; color: var(--text); font-size: 14px; outline: none; transition: border-color 0.2s; }
+  .form-input:focus { border-color: var(--purple); }
+  .btn-primary { width: 100%; padding: 11px; background: var(--purple); border: none; border-radius: 8px; color: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-top: 0.5rem; }
+  .btn-primary:hover { background: var(--purple-light); }
+  .auth-error { color: var(--red); font-size: 13px; text-align: center; margin-top: 0.75rem; display: none; }
+  .auth-tabs { display: flex; gap: 0; margin-bottom: 1.5rem; background: var(--bg3); border-radius: 8px; padding: 3px; }
+  .auth-tab { flex: 1; padding: 8px; text-align: center; font-size: 13px; cursor: pointer; border-radius: 6px; color: var(--text2); transition: all 0.2s; }
+  .auth-tab.active { background: var(--bg2); color: var(--text); font-weight: 500; }
+
+  /* APP */
+  #app { display: none; flex-direction: column; min-height: 100vh; }
+  .topbar { height: 56px; background: var(--bg2); border-bottom: 1px solid var(--border2); display: flex; align-items: center; padding: 0 1.5rem; gap: 1rem; position: sticky; top: 0; z-index: 100; }
+  .topbar-logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 16px; }
+  .topbar-logo .logo-icon { width: 28px; height: 28px; font-size: 14px; }
+  .topbar-nav { display: flex; gap: 0.25rem; margin-left: 1rem; }
+  .nav-btn { padding: 6px 12px; border-radius: 6px; font-size: 13px; cursor: pointer; color: var(--text2); background: none; border: none; transition: all 0.2s; }
+  .nav-btn:hover, .nav-btn.active { background: var(--bg3); color: var(--text); }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 0.75rem; }
+  .user-pill { display: flex; align-items: center; gap: 8px; background: var(--bg3); border-radius: 20px; padding: 5px 12px; font-size: 13px; }
+  .user-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; }
+  .btn-sm { padding: 7px 14px; border-radius: 7px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all 0.15s; }
+  .btn-ghost { background: none; border: 1px solid var(--border2); color: var(--text); }
+  .btn-ghost:hover { border-color: var(--purple); color: var(--purple); }
+  .btn-purple { background: var(--purple); color: white; }
+  .btn-purple:hover { background: var(--purple-light); }
+  .btn-danger { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+  .btn-danger:hover { background: rgba(239,68,68,0.25); }
+
+  /* MAIN */
+  .main { flex: 1; padding: 2rem 1.5rem; max-width: 1100px; margin: 0 auto; width: 100%; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* DASHBOARD */
+  .dash-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+  .dash-title { font-size: 22px; font-weight: 700; }
+  .dash-sub { color: var(--text2); font-size: 14px; margin-top: 2px; }
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
+  .stat-card { background: var(--bg2); border: 1px solid var(--border2); border-radius: 10px; padding: 1rem; }
+  .stat-label { font-size: 12px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .stat-val { font-size: 24px; font-weight: 700; font-family: var(--mono); }
+  .stat-val.purple { color: var(--purple-light); }
+  .stat-val.green { color: var(--green); }
+  .stat-val.amber { color: var(--amber); }
+  .sites-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+  .site-card { background: var(--bg2); border: 1px solid var(--border2); border-radius: 12px; overflow: hidden; transition: border-color 0.2s, transform 0.15s; cursor: pointer; }
+  .site-card:hover { border-color: var(--purple); transform: translateY(-2px); }
+  .site-preview { height: 140px; background: var(--bg3); display: flex; align-items: center; justify-content: center; }
+  .site-preview-dot { width: 60px; height: 60px; border-radius: 50%; background: var(--purple); display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; }
+  .site-body { padding: 1rem; }
+  .site-name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+  .site-domain { font-family: var(--mono); font-size: 12px; color: var(--purple-light); margin-bottom: 10px; }
+  .site-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 5px; font-size: 11px; font-weight: 500; }
+  .badge-green { background: rgba(16,185,129,0.12); color: var(--green); }
+  .badge-amber { background: rgba(245,158,11,0.12); color: var(--amber); }
+  .badge-red { background: rgba(239,68,68,0.12); color: var(--red); }
+  .badge-purple { background: rgba(124,58,237,0.15); color: var(--purple-light); }
+  .badge-gray { background: var(--bg3); color: var(--text3); }
+  .site-time { margin-left: auto; font-size: 11px; color: var(--text3); }
+
+  /* MODALS */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+  .modal { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; }
+  .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 0.5rem; }
+  .modal-sub { font-size: 13px; color: var(--text2); margin-bottom: 1.5rem; }
+  .modal-footer { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem; }
+  .step-indicator { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+  .step { flex: 1; height: 3px; background: var(--bg4); border-radius: 2px; transition: background 0.3s; }
+  .step.done { background: var(--green); }
+  .step.active { background: var(--purple); }
+  .section-label { font-size: 12px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 0.75rem; margin-top: 1rem; }
+  .repo-list { display: flex; flex-direction: column; gap: 0.5rem; max-height: 200px; overflow-y: auto; margin-bottom: 1rem; }
+  .repo-item { padding: 10px 12px; background: var(--bg3); border-radius: 8px; border: 1px solid transparent; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  .repo-item:hover { border-color: var(--purple); }
+  .repo-item.selected { border-color: var(--purple); background: rgba(124,58,237,0.1); }
+  .repo-icon { width: 28px; height: 28px; background: var(--bg4); border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .domain-row { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1rem; }
+  .domain-input-wrap { flex: 1; display: flex; align-items: center; background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; overflow: hidden; }
+  .domain-prefix { padding: 10px 12px; color: var(--text3); font-family: var(--mono); font-size: 13px; border-right: 1px solid var(--border2); }
+  .domain-input { flex: 1; padding: 10px; background: none; border: none; color: var(--text); font-family: var(--mono); font-size: 13px; outline: none; }
+  .domain-suffix { padding: 10px 12px; color: var(--text3); font-family: var(--mono); font-size: 13px; border-left: 1px solid var(--border2); }
+  .custom-domain-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+  .custom-domain-input { flex: 1; }
+  .domain-status { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: var(--bg3); border-radius: 8px; font-size: 13px; margin-bottom: 0.75rem; }
+  .plan-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem; }
+  .plan-card { padding: 1rem; background: var(--bg3); border-radius: 10px; border: 1.5px solid transparent; cursor: pointer; transition: all 0.15s; }
+  .plan-card.selected { border-color: var(--purple); background: rgba(124,58,237,0.08); }
+  .plan-name { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+  .plan-price { font-family: var(--mono); font-size: 20px; font-weight: 700; color: var(--purple-light); }
+  .plan-price span { font-size: 12px; color: var(--text2); font-family: sans-serif; font-weight: 400; }
+  .plan-feat { font-size: 12px; color: var(--text2); margin-top: 6px; }
+  .alert-box { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 1rem; display: flex; align-items: flex-start; gap: 8px; }
+  .alert-info { background: rgba(124,58,237,0.1); border: 1px solid rgba(124,58,237,0.25); color: var(--purple-light); }
+  .alert-success { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.25); color: var(--green); }
+  .alert-warning { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.25); color: var(--amber); }
+
+  /* ADMIN */
+  .admin-section { background: var(--bg2); border: 1px solid var(--border2); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
+  .admin-section-title { font-size: 15px; font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+  .admin-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .admin-table th { text-align: left; padding: 8px 12px; color: var(--text3); font-weight: 500; border-bottom: 1px solid var(--border2); }
+  .admin-table td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .admin-table tr:last-child td { border-bottom: none; }
+  .toggle { position: relative; width: 36px; height: 20px; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider { position: absolute; inset: 0; background: var(--bg4); border-radius: 20px; cursor: pointer; transition: 0.2s; }
+  .toggle-slider:before { content: ''; position: absolute; width: 14px; height: 14px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.2s; }
+  .toggle input:checked + .toggle-slider { background: var(--purple); }
+  .toggle input:checked + .toggle-slider:before { transform: translateX(16px); }
+  .log-box { background: #080810; border: 1px solid var(--border2); border-radius: 8px; padding: 1rem; font-family: var(--mono); font-size: 12px; line-height: 1.8; max-height: 200px; overflow-y: auto; }
+  .log-line { color: var(--text2); }
+  .log-line.success { color: var(--green); }
+  .log-line.info { color: var(--purple-light); }
+  .log-line.warn { color: var(--amber); }
+  .settings-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .settings-row:last-child { border-bottom: none; }
+  .settings-label { font-size: 14px; font-weight: 500; }
+  .settings-desc { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .danger-zone { border-color: rgba(239,68,68,0.2); }
+  .danger-zone .admin-section-title { color: var(--red); }
+  .empty-state { text-align: center; padding: 4rem 2rem; }
+  .empty-icon { font-size: 48px; margin-bottom: 1rem; }
+  .empty-title { font-size: 18px; font-weight: 600; margin-bottom: 0.5rem; }
+  .empty-sub { color: var(--text2); font-size: 14px; margin-bottom: 1.5rem; }
+</style>
+</head>
+<body>
+
+<!-- FIREBASE SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+<!-- AUTH SCREEN -->
+<div id="auth-screen">
+  <div class="auth-box">
+    <div class="logo">
+      <div class="logo-icon">D</div>
+      <span class="logo-name">DeployOS</span>
+    </div>
+    <div class="auth-tabs">
+      <div class="auth-tab active" onclick="switchTab('login')">Iniciar sesión</div>
+      <div class="auth-tab" onclick="switchTab('register')">Registrarse</div>
+    </div>
+    <div id="tab-login">
+      <div class="form-group">
+        <label class="form-label">Correo electrónico</label>
+        <input type="email" id="login-email" class="form-input" placeholder="tu@correo.com" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contraseña</label>
+        <input type="password" id="login-password" class="form-input" placeholder="••••••••" />
+      </div>
+      <button class="btn-primary" onclick="doLogin()">Entrar</button>
+      <div class="auth-error" id="login-error"></div>
+    </div>
+    <div id="tab-register" style="display:none;">
+      <div class="form-group">
+        <label class="form-label">Nombre</label>
+        <input type="text" id="reg-name" class="form-input" placeholder="Tu nombre" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Correo electrónico</label>
+        <input type="email" id="reg-email" class="form-input" placeholder="tu@correo.com" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contraseña</label>
+        <input type="password" id="reg-password" class="form-input" placeholder="••••••••" />
+      </div>
+      <button class="btn-primary" onclick="doRegister()">Crear cuenta</button>
+      <div class="auth-error" id="reg-error"></div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <nav class="topbar">
+    <div class="topbar-logo">
+      <div class="logo-icon">D</div>
+      DeployOS
+    </div>
+    <div class="topbar-nav">
+      <button class="nav-btn active" onclick="showPage('dashboard',this)">Dashboard</button>
+      <button class="nav-btn" onclick="showPage('settings',this)">Configuración</button>
+      <button class="nav-btn admin-only" style="display:none" onclick="showPage('admin',this)">⚡ Admin</button>
+    </div>
+    <div class="topbar-right">
+      <div class="user-pill">
+        <div class="user-dot"></div>
+        <span id="user-display">Usuario</span>
+      </div>
+      <button class="btn-sm btn-ghost" onclick="doLogout()">Salir</button>
+    </div>
+  </nav>
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <div id="page-dashboard" class="page active">
+      <div class="dash-header">
+        <div>
+          <div class="dash-title">Mis sitios</div>
+          <div class="dash-sub">Gestiona tus despliegues</div>
+        </div>
+        <button class="btn-sm btn-purple" onclick="openNewSite()">+ Nuevo sitio</button>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-label">Sitios activos</div><div class="stat-val purple" id="stat-sites">0</div></div>
+        <div class="stat-card"><div class="stat-label">Dominios custom</div><div class="stat-val green" id="stat-domains">0</div></div>
+        <div class="stat-card"><div class="stat-label">Despliegues</div><div class="stat-val amber" id="stat-deploys">0</div></div>
+      </div>
+      <div class="empty-state" id="empty-state">
+        <div class="empty-icon">🚀</div>
+        <div class="empty-title">Sin sitios todavía</div>
+        <div class="empty-sub">Crea tu primer sitio y conéctalo a GitHub</div>
+        <button class="btn-sm btn-purple" onclick="openNewSite()">+ Crear primer sitio</button>
+      </div>
+      <div class="sites-grid" id="sites-grid" style="display:none;"></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="page-settings" class="page">
+      <div class="dash-header">
+        <div><div class="dash-title">Configuración</div><div class="dash-sub">Cuenta y preferencias</div></div>
+      </div>
+      <div class="admin-section">
+        <div class="admin-section-title">👤 Perfil</div>
+        <div class="settings-row">
+          <div><div class="settings-label">Nombre</div><div class="settings-desc" id="settings-name">—</div></div>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-label">Email</div><div class="settings-desc" id="settings-email">—</div></div>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-label">Plan actual</div><div class="settings-desc" id="settings-plan">Free</div></div>
+          <button class="btn-sm btn-purple" onclick="openModal('modal-upgrade')">Mejorar plan</button>
+        </div>
+      </div>
+      <div class="admin-section">
+        <div class="admin-section-title">🔗 Conexiones</div>
+        <div class="settings-row">
+          <div><div class="settings-label">GitHub</div><div class="settings-desc" id="github-status">No conectado</div></div>
+          <button class="btn-sm btn-ghost" onclick="document.getElementById('github-status').textContent='✅ Conectado como @tu-usuario'">Conectar</button>
+        </div>
+      </div>
+      <div class="admin-section danger-zone">
+        <div class="admin-section-title">⚠️ Zona de peligro</div>
+        <div class="settings-row">
+          <div><div class="settings-label">Eliminar cuenta</div><div class="settings-desc">Elimina todos tus sitios y datos permanentemente</div></div>
+          <button class="btn-sm btn-danger">Eliminar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN -->
+    <div id="page-admin" class="page">
+      <div class="dash-header">
+        <div><div class="dash-title">⚡ Panel de administrador</div><div class="dash-sub">Control total de la plataforma</div></div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-label">Usuarios totales</div><div class="stat-val purple" id="admin-stat-users">—</div></div>
+        <div class="stat-card"><div class="stat-label">Sitios totales</div><div class="stat-val green" id="admin-stat-sites">—</div></div>
+        <div class="stat-card"><div class="stat-label">Dominios custom</div><div class="stat-val amber" id="admin-stat-domains">—</div></div>
+      </div>
+      <div class="admin-section">
+        <div class="admin-section-title">👥 Usuarios registrados</div>
+        <table class="admin-table">
+          <thead><tr><th>Usuario</th><th>Email</th><th>Plan</th><th>Sitios</th><th>Acción</th></tr></thead>
+          <tbody id="users-tbody"></tbody>
+        </table>
+      </div>
+      <div class="admin-section">
+        <div class="admin-section-title">🌐 Todos los sitios</div>
+        <table class="admin-table">
+          <thead><tr><th>Sitio</th><th>Estado</th><th>Dominio</th></tr></thead>
+          <tbody id="all-sites-tbody"><tr><td colspan="3" style="color:var(--text3);text-align:center;padding:1.5rem">Sin sitios registrados</td></tr></tbody>
+        </table>
+      </div>
+      <div class="admin-section">
+        <div class="admin-section-title">⚙️ Configuración de plataforma</div>
+        <div class="settings-row">
+          <div><div class="settings-label">Modo mantenimiento</div><div class="settings-desc">Bloquea nuevos accesos</div></div>
+          <label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-label">Registro abierto</div><div class="settings-desc">Permite nuevos registros</div></div>
+          <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL: NUEVO SITIO -->
+<div class="modal-overlay" id="modal-new-site" style="display:none;">
+  <div class="modal">
+    <div class="modal-title">🚀 Nuevo sitio</div>
+    <div class="modal-sub">Conecta tu repositorio y despliega en segundos</div>
+    <div class="step-indicator">
+      <div class="step active" id="step1"></div>
+      <div class="step" id="step2"></div>
+      <div class="step" id="step3"></div>
+    </div>
+    <div id="new-step-1">
+      <div class="section-label">Repositorio de GitHub</div>
+      <input class="form-input" placeholder="Buscar repositorio..." id="repo-search" oninput="filterRepos()" style="margin-bottom:0.75rem" />
+      <div class="repo-list" id="repo-list">
+        <div class="repo-item" onclick="selectRepo(this,'my-portfolio')" data-repo="my-portfolio"><div class="repo-icon">📁</div><div><b>my-portfolio</b><div style="font-size:11px;color:var(--text3)">HTML, CSS · hace 2h</div></div></div>
+        <div class="repo-item" onclick="selectRepo(this,'react-blog')" data-repo="react-blog"><div class="repo-icon">⚛️</div><div><b>react-blog</b><div style="font-size:11px;color:var(--text3)">React · ayer</div></div></div>
+        <div class="repo-item" onclick="selectRepo(this,'nextjs-shop')" data-repo="nextjs-shop"><div class="repo-icon">🛒</div><div><b>nextjs-shop</b><div style="font-size:11px;color:var(--text3)">Next.js · hace 3 días</div></div></div>
+        <div class="repo-item" onclick="selectRepo(this,'landing-page')" data-repo="landing-page"><div class="repo-icon">🎨</div><div><b>landing-page</b><div style="font-size:11px;color:var(--text3)">Vue · hace 1 semana</div></div></div>
+        <div class="repo-item" onclick="selectRepo(this,'api-backend')" data-repo="api-backend"><div class="repo-icon">⚙️</div><div><b>api-backend</b><div style="font-size:11px;color:var(--text3)">Node.js · hace 2 semanas</div></div></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-sm btn-ghost" onclick="closeModal('modal-new-site')">Cancelar</button>
+        <button class="btn-sm btn-purple" onclick="goStep(2)">Siguiente →</button>
+      </div>
+    </div>
+    <div id="new-step-2" style="display:none;">
+      <div class="section-label">Subdominio gratuito</div>
+      <div class="domain-row">
+        <div class="domain-input-wrap" style="flex:1;">
+          <span class="domain-prefix">https://</span>
+          <input class="domain-input" id="subdomain-input" placeholder="mi-sitio" oninput="checkDomain()" />
+          <span class="domain-suffix">.deployos.app</span>
+        </div>
+      </div>
+      <div id="domain-check" class="domain-status" style="display:none;"></div>
+      <div class="section-label" style="margin-top:1.25rem;">Dominio personalizado <span class="badge badge-amber" id="custom-domain-badge">1° vez gratis</span></div>
+      <div class="custom-domain-row">
+        <input class="form-input custom-domain-input" id="custom-domain-input" placeholder="misitioweb.com" />
+        <button class="btn-sm btn-ghost" onclick="addCustomDomain()">Añadir</button>
+      </div>
+      <div id="custom-domain-info" class="alert-box" style="display:none;"></div>
+      <div class="modal-footer">
+        <button class="btn-sm btn-ghost" onclick="goStep(1)">← Atrás</button>
+        <button class="btn-sm btn-purple" onclick="goStep(3)">Siguiente →</button>
+      </div>
+    </div>
+    <div id="new-step-3" style="display:none;">
+      <div class="section-label">Resumen</div>
+      <div style="background:var(--bg3);border-radius:8px;padding:1rem;margin-bottom:1rem;font-size:13px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="color:var(--text2)">Repositorio</span><span id="summary-repo" style="font-family:var(--mono)">—</span></div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="color:var(--text2)">URL</span><span id="summary-url" style="font-family:var(--mono);color:var(--purple-light)">—</span></div>
+        <div style="display:flex;justify-content:space-between;"><span style="color:var(--text2)">Rama</span><span style="font-family:var(--mono)">main</span></div>
+      </div>
+      <div class="section-label">Log de despliegue</div>
+      <div class="log-box" id="deploy-log"><div class="log-line info">Listo para desplegar...</div></div>
+      <div class="modal-footer">
+        <button class="btn-sm btn-ghost" id="btn-back-3" onclick="goStep(2)">← Atrás</button>
+        <button class="btn-sm btn-purple" id="btn-deploy" onclick="startDeploy()">🚀 Desplegar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: SITE DETAIL -->
+<div class="modal-overlay" id="modal-site-detail" style="display:none;">
+  <div class="modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+      <div>
+        <div class="modal-title" id="detail-name">Sitio</div>
+        <div style="font-family:var(--mono);font-size:13px;color:var(--purple-light);margin-top:4px;" id="detail-domain">—</div>
+      </div>
+      <span class="badge badge-green" id="detail-badge">Activo</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1.5rem;">
+      <div class="stat-card"><div class="stat-label">Repositorio</div><div style="font-family:var(--mono);font-size:13px;margin-top:4px;" id="detail-repo">—</div></div>
+      <div class="stat-card"><div class="stat-label">Despliegues</div><div class="stat-val purple" id="detail-deploys" style="font-size:18px;">0</div></div>
+    </div>
+    <div class="section-label">Acciones</div>
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.5rem;">
+      <button class="btn-sm btn-ghost" onclick="redeploySite()">🔄 Redesplegar</button>
+      <button class="btn-sm btn-ghost" onclick="alert('Abriendo: '+currentSite.domain)">🔗 Ver sitio</button>
+    </div>
+    <div class="section-label">Dominio personalizado</div>
+    <div id="detail-domains-list" style="margin-bottom:1rem;"></div>
+    <div class="custom-domain-row">
+      <input class="form-input custom-domain-input" id="detail-add-domain" placeholder="nuevo-dominio.com" />
+      <button class="btn-sm btn-ghost" onclick="addDomainToSite()">Añadir</button>
+    </div>
+    <div id="detail-domain-msg" class="alert-box" style="display:none;margin-top:0.75rem;"></div>
+    <div class="modal-footer">
+      <button class="btn-sm btn-danger" onclick="deleteSite()">Eliminar sitio</button>
+      <button class="btn-sm btn-ghost" onclick="closeModal('modal-site-detail')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: UPGRADE -->
+<div class="modal-overlay" id="modal-upgrade" style="display:none;">
+  <div class="modal">
+    <div class="modal-title">⚡ Mejorar plan</div>
+    <div class="modal-sub">Desbloquea más potencia para tus proyectos</div>
+    <div class="plan-cards">
+      <div class="plan-card selected" onclick="selectPlan(this,'Free')">
+        <div class="plan-name">Free</div>
+        <div class="plan-price">$0 <span>/mes</span></div>
+        <div class="plan-feat">• 3 sitios<br>• 1 dominio gratis<br>• Despliegue básico</div>
+      </div>
+      <div class="plan-card" onclick="selectPlan(this,'Pro')">
+        <div class="plan-name">Pro ⭐</div>
+        <div class="plan-price">$20 <span>/mes</span></div>
+        <div class="plan-feat">• Sitios ilimitados<br>• Dominios ilimitados<br>• CI/CD avanzado</div>
+      </div>
+    </div>
+    <div class="plan-cards">
+      <div class="plan-card" onclick="selectPlan(this,'Team')">
+        <div class="plan-name">Team</div>
+        <div class="plan-price">$50 <span>/mes</span></div>
+        <div class="plan-feat">• Todo de Pro<br>• Equipo incluido<br>• Analíticas</div>
+      </div>
+      <div class="plan-card" onclick="selectPlan(this,'Enterprise')">
+        <div class="plan-name">Enterprise</div>
+        <div class="plan-price">Custom</div>
+        <div class="plan-feat">• Todo ilimitado<br>• SLA garantizado<br>• Soporte dedicado</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm btn-ghost" onclick="closeModal('modal-upgrade')">Cancelar</button>
+      <button class="btn-sm btn-purple" onclick="upgradePlan()">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
