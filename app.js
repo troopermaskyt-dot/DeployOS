@@ -533,6 +533,7 @@ function renderMiniPreview(i, site, color) {
   </body></html>`;
   const iframe = document.createElement('iframe');
   iframe.srcdoc = html;
+  iframe.setAttribute('sandbox', 'allow-scripts');
   iframe.style.cssText = 'width:200%;height:200%;transform:scale(0.5);transform-origin:top left;border:none;pointer-events:none;';
   container.appendChild(iframe);
 }
