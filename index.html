@@ -6,7 +6,7 @@
 <title>DeployOS — Hosting Platform</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Inter', sans-serif; background: #0A0A0F; color: #F8F8FF; min-height: 100vh; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: #0A0A0F; color: #F8F8FF; min-height: 100vh; }
   :root {
     --purple: #7C3AED; --purple-light: #A855F7; --purple-dark: #5B21B6;
     --bg: #0A0A0F; --bg2: #12121A; --bg3: #1A1A26; --bg4: #22223A;
@@ -16,14 +16,15 @@
     --mono: 'JetBrains Mono', 'Fira Code', monospace;
   }
 
-  /* AUTH */
+  /* ── AUTH ───────────────────────────────── */
   #auth-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; }
   .auth-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px; padding: 2.5rem; width: 100%; max-width: 400px; }
   .logo { display: flex; align-items: center; gap: 10px; margin-bottom: 2rem; justify-content: center; }
   .logo-icon { width: 36px; height: 36px; background: var(--purple); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: white; }
   .logo-name { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
-  .auth-title { font-size: 20px; font-weight: 600; text-align: center; margin-bottom: 0.5rem; }
-  .auth-sub { color: var(--text2); font-size: 14px; text-align: center; margin-bottom: 1.5rem; }
+  .auth-tabs { display: flex; background: var(--bg3); border-radius: 8px; padding: 3px; margin-bottom: 1.5rem; }
+  .auth-tab { flex: 1; padding: 8px; text-align: center; font-size: 13px; cursor: pointer; border-radius: 6px; color: var(--text2); transition: all 0.2s; }
+  .auth-tab.active { background: var(--bg2); color: var(--text); font-weight: 500; }
   .form-group { margin-bottom: 1rem; }
   .form-label { font-size: 13px; color: var(--text2); margin-bottom: 6px; display: block; }
   .form-input { width: 100%; padding: 10px 14px; background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; color: var(--text); font-size: 14px; outline: none; transition: border-color 0.2s; }
@@ -31,11 +32,8 @@
   .btn-primary { width: 100%; padding: 11px; background: var(--purple); border: none; border-radius: 8px; color: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-top: 0.5rem; }
   .btn-primary:hover { background: var(--purple-light); }
   .auth-error { color: var(--red); font-size: 13px; text-align: center; margin-top: 0.75rem; display: none; }
-  .auth-tabs { display: flex; gap: 0; margin-bottom: 1.5rem; background: var(--bg3); border-radius: 8px; padding: 3px; }
-  .auth-tab { flex: 1; padding: 8px; text-align: center; font-size: 13px; cursor: pointer; border-radius: 6px; color: var(--text2); transition: all 0.2s; }
-  .auth-tab.active { background: var(--bg2); color: var(--text); font-weight: 500; }
 
-  /* APP */
+  /* ── APP SHELL ───────────────────────────── */
   #app { display: none; flex-direction: column; min-height: 100vh; }
   .topbar { height: 56px; background: var(--bg2); border-bottom: 1px solid var(--border2); display: flex; align-items: center; padding: 0 1.5rem; gap: 1rem; position: sticky; top: 0; z-index: 100; }
   .topbar-logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 16px; cursor: pointer; }
@@ -44,26 +42,29 @@
   .nav-btn { padding: 6px 12px; border-radius: 6px; font-size: 13px; cursor: pointer; color: var(--text2); background: none; border: none; transition: all 0.2s; }
   .nav-btn:hover, .nav-btn.active { background: var(--bg3); color: var(--text); }
   .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 0.75rem; }
+  .github-badge { display: none; align-items: center; gap: 6px; background: var(--bg3); border: 1px solid var(--border2); border-radius: 20px; padding: 4px 10px; font-size: 12px; }
   .user-pill { display: flex; align-items: center; gap: 8px; background: var(--bg3); border-radius: 20px; padding: 5px 12px; font-size: 13px; }
   .user-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; }
   .btn-sm { padding: 7px 14px; border-radius: 7px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all 0.15s; }
   .btn-ghost { background: none; border: 1px solid var(--border2); color: var(--text); }
-  .btn-ghost:hover { border-color: var(--purple); color: var(--purple); }
+  .btn-ghost:hover { border-color: var(--purple); color: var(--purple-light); }
   .btn-purple { background: var(--purple); color: white; }
   .btn-purple:hover { background: var(--purple-light); }
   .btn-danger { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
   .btn-danger:hover { background: rgba(239,68,68,0.25); }
+  .btn-github { background: #24292e; color: white; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 8px; }
+  .btn-github:hover { background: #333; }
 
-  /* MAIN */
+  /* ── MAIN ────────────────────────────────── */
   .main { flex: 1; padding: 2rem 1.5rem; max-width: 1100px; margin: 0 auto; width: 100%; }
   .page { display: none; }
   .page.active { display: block; }
 
-  /* DASHBOARD */
-  .dash-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+  /* ── DASHBOARD ───────────────────────────── */
+  .dash-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
   .dash-title { font-size: 22px; font-weight: 700; }
   .dash-sub { color: var(--text2); font-size: 14px; margin-top: 2px; }
-  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
   .stat-card { background: var(--bg2); border: 1px solid var(--border2); border-radius: 10px; padding: 1rem; }
   .stat-label { font-size: 12px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
   .stat-val { font-size: 24px; font-weight: 700; font-family: var(--mono); }
@@ -73,11 +74,10 @@
   .sites-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
   .site-card { background: var(--bg2); border: 1px solid var(--border2); border-radius: 12px; overflow: hidden; transition: border-color 0.2s, transform 0.15s; cursor: pointer; }
   .site-card:hover { border-color: var(--purple); transform: translateY(-2px); }
-  .site-preview { height: 160px; background: var(--bg3); position: relative; overflow: hidden; }
-  .site-preview iframe { width: 200%; height: 200%; transform: scale(0.5); transform-origin: top left; pointer-events: none; border: none; }
-  .site-preview-fallback { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-  .site-preview-dot { width: 60px; height: 60px; border-radius: 50%; background: var(--purple); display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; }
-  .site-preview-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 60%, rgba(18,18,26,0.9) 100%); }
+  .site-preview-card { height: 160px; background: var(--bg3); position: relative; overflow: hidden; }
+  .site-preview-mini { width: 100%; height: 100%; }
+  .site-preview-mini iframe { width: 200%; height: 200%; transform: scale(0.5); transform-origin: top left; pointer-events: none; border: none; }
+  .site-preview-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 50%, rgba(18,18,26,0.95) 100%); }
   .site-body { padding: 1rem; }
   .site-name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
   .site-domain { font-family: var(--mono); font-size: 12px; color: var(--purple-light); margin-bottom: 10px; }
@@ -89,48 +89,44 @@
   .badge-purple { background: rgba(124,58,237,0.15); color: var(--purple-light); }
   .badge-gray { background: var(--bg3); color: var(--text3); }
   .site-time { margin-left: auto; font-size: 11px; color: var(--text3); }
+  .empty-state { text-align: center; padding: 4rem 2rem; }
+  .empty-icon { font-size: 48px; margin-bottom: 1rem; }
+  .empty-title { font-size: 18px; font-weight: 600; margin-bottom: 0.5rem; }
+  .empty-sub { color: var(--text2); font-size: 14px; margin-bottom: 1.5rem; }
 
-  /* PROJECT PAGE (estilo Vercel) */
-  #page-project { display: none; }
-  #page-project.active { display: block; }
-  .project-header { display: flex; align-items: center; gap: 12px; margin-bottom: 0; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border2); }
+  /* ── PROJECT PAGE ─────────────────────────── */
+  .project-header { display: flex; align-items: center; gap: 12px; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border2); flex-wrap: wrap; }
   .project-back { background: none; border: 1px solid var(--border2); color: var(--text2); border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 5px; transition: all 0.15s; }
   .project-back:hover { border-color: var(--purple); color: var(--text); }
-  .project-title { font-size: 20px; font-weight: 700; }
   .project-domain-link { font-family: var(--mono); font-size: 13px; color: var(--purple-light); text-decoration: none; }
   .project-domain-link:hover { text-decoration: underline; }
-  .project-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border2); margin-bottom: 1.5rem; margin-top: 1.5rem; }
-  .project-tab { padding: 10px 16px; font-size: 13px; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; display: flex; align-items: center; gap: 6px; background: none; border-top: none; border-left: none; border-right: none; margin-bottom: -1px; }
+  .project-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border2); margin: 1.5rem 0; overflow-x: auto; }
+  .project-tab { padding: 10px 16px; font-size: 13px; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; display: flex; align-items: center; gap: 6px; background: none; border-top: none; border-left: none; border-right: none; margin-bottom: -1px; white-space: nowrap; }
   .project-tab:hover { color: var(--text); }
   .project-tab.active { color: var(--text); border-bottom-color: var(--purple-light); font-weight: 500; }
-  .project-tab-icon { font-size: 14px; }
   .tab-content { display: none; }
   .tab-content.active { display: block; }
 
-  /* TAB: PREVIEW */
+  /* ── PREVIEW TAB ─────────────────────────── */
   .preview-container { background: var(--bg2); border: 1px solid var(--border2); border-radius: 12px; overflow: hidden; }
-  .preview-toolbar { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--bg3); border-bottom: 1px solid var(--border2); }
+  .preview-toolbar { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--bg3); border-bottom: 1px solid var(--border2); flex-wrap: wrap; gap: 8px; }
   .browser-dots { display: flex; gap: 5px; }
   .browser-dot { width: 10px; height: 10px; border-radius: 50%; }
   .browser-dot.red { background: #FF5F57; }
   .browser-dot.yellow { background: #FEBC2E; }
   .browser-dot.green { background: #28C840; }
-  .browser-url-bar { flex: 1; background: var(--bg2); border: 1px solid var(--border2); border-radius: 6px; padding: 5px 12px; font-family: var(--mono); font-size: 12px; color: var(--text2); display: flex; align-items: center; gap: 6px; }
-  .browser-url-bar span.lock { color: var(--green); font-size: 11px; }
-  .preview-toolbar-actions { display: flex; gap: 6px; }
-  .preview-viewport { width: 100%; height: 520px; background: white; position: relative; }
-  .preview-viewport iframe { width: 100%; height: 100%; border: none; }
-  .preview-placeholder { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f5f5f5; gap: 12px; }
-  .preview-placeholder-icon { font-size: 48px; }
-  .preview-placeholder-text { font-size: 14px; color: #666; }
-  .preview-placeholder-sub { font-size: 12px; color: #999; font-family: var(--mono); }
+  .browser-url-bar { flex: 1; min-width: 120px; background: var(--bg2); border: 1px solid var(--border2); border-radius: 6px; padding: 5px 12px; font-family: var(--mono); font-size: 12px; color: var(--text2); display: flex; align-items: center; gap: 6px; }
+  .preview-toolbar-actions { display: flex; gap: 6px; align-items: center; }
   .preview-size-btns { display: flex; gap: 4px; }
-  .size-btn { padding: 4px 10px; background: var(--bg2); border: 1px solid var(--border2); border-radius: 5px; font-size: 11px; color: var(--text3); cursor: pointer; transition: all 0.15s; }
+  .size-btn { padding: 4px 10px; background: var(--bg2); border: 1px solid var(--border2); border-radius: 5px; font-size: 13px; color: var(--text3); cursor: pointer; transition: all 0.15s; }
   .size-btn:hover, .size-btn.active { border-color: var(--purple); color: var(--text); }
+  .preview-viewport { width: 100%; height: 520px; background: white; position: relative; display: flex; align-items: flex-start; justify-content: center; overflow: hidden; }
+  .preview-viewport iframe { width: 100%; height: 100%; border: none; transition: width 0.3s; }
+  .preview-placeholder { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f5f5f5; gap: 12px; }
 
-  /* TAB: DEPLOYMENTS */
+  /* ── DEPLOYMENTS TAB ──────────────────────── */
   .deploy-list { display: flex; flex-direction: column; gap: 0; }
-  .deploy-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--bg2); border: 1px solid var(--border2); border-radius: 0; border-bottom: none; }
+  .deploy-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--bg2); border: 1px solid var(--border2); border-bottom: none; }
   .deploy-item:first-child { border-radius: 10px 10px 0 0; }
   .deploy-item:last-child { border-radius: 0 0 10px 10px; border-bottom: 1px solid var(--border2); }
   .deploy-item:only-child { border-radius: 10px; border-bottom: 1px solid var(--border2); }
@@ -139,16 +135,16 @@
   .deploy-status-dot.ok { background: var(--green); }
   .deploy-status-dot.pending { background: var(--amber); animation: pulse 1.2s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-  .deploy-info { flex: 1; }
+  .deploy-info { flex: 1; min-width: 0; }
   .deploy-name { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
   .deploy-meta { font-size: 12px; color: var(--text3); font-family: var(--mono); }
-  .deploy-time { font-size: 12px; color: var(--text3); margin-left: auto; }
+  .deploy-time { font-size: 12px; color: var(--text3); white-space: nowrap; }
   .deploy-actions { display: flex; gap: 6px; }
 
-  /* TAB: ANALYTICS */
+  /* ── ANALYTICS TAB ────────────────────────── */
   .analytics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
   .analytics-card { background: var(--bg2); border: 1px solid var(--border2); border-radius: 10px; padding: 1.25rem; }
-  .analytics-label { font-size: 12px; color: var(--text3); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .analytics-label { font-size: 12px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
   .analytics-value { font-size: 28px; font-weight: 700; font-family: var(--mono); margin-bottom: 4px; }
   .analytics-change { font-size: 12px; color: var(--green); }
   .analytics-change.down { color: var(--red); }
@@ -158,58 +154,55 @@
   .mini-bar { flex: 1; background: var(--purple); border-radius: 3px 3px 0 0; opacity: 0.7; transition: opacity 0.15s; }
   .mini-bar:hover { opacity: 1; }
 
-  /* TAB: DOMAINS */
-  .domains-list { display: flex; flex-direction: column; gap: 8px; }
+  /* ── DOMAINS TAB ──────────────────────────── */
+  .domains-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1rem; }
   .domain-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--bg2); border: 1px solid var(--border2); border-radius: 10px; }
   .domain-item-icon { font-size: 18px; }
   .domain-item-info { flex: 1; }
   .domain-item-name { font-family: var(--mono); font-size: 14px; font-weight: 500; }
   .domain-item-meta { font-size: 12px; color: var(--text3); margin-top: 2px; }
-  .domain-add-row { display: flex; gap: 8px; margin-top: 12px; }
+  .domain-add-row { display: flex; gap: 8px; }
 
-  /* TAB: ENVIRONMENT */
-  .env-list { display: flex; flex-direction: column; gap: 0; margin-bottom: 1rem; }
-  .env-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--bg2); border: 1px solid var(--border2); border-bottom: none; }
-  .env-item:first-child { border-radius: 10px 10px 0 0; }
-  .env-item:last-child { border-radius: 0 0 10px 10px; border-bottom: 1px solid var(--border2); }
+  /* ── ENV TAB ──────────────────────────────── */
+  .env-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 1rem; }
+  .env-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--bg2); border: 1px solid var(--border2); border-radius: 10px; }
   .env-key { font-family: var(--mono); font-size: 13px; font-weight: 600; flex: 1; }
   .env-value { font-family: var(--mono); font-size: 12px; color: var(--text3); background: var(--bg3); padding: 4px 10px; border-radius: 5px; }
-  .env-env-badge { font-size: 10px; padding: 2px 6px; }
 
-  /* TAB: SETTINGS */
+  /* ── SETTINGS TAB ─────────────────────────── */
   .settings-section { background: var(--bg2); border: 1px solid var(--border2); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
-  .settings-section-title { font-size: 14px; font-weight: 600; margin-bottom: 1.25rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; font-size: 12px; }
-  .settings-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .settings-section-title { font-size: 11px; font-weight: 600; margin-bottom: 1.25rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; }
+  .settings-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); gap: 1rem; }
   .settings-row:last-child { border-bottom: none; padding-bottom: 0; }
   .settings-row:first-of-type { padding-top: 0; }
   .settings-label { font-size: 14px; font-weight: 500; }
   .settings-desc { font-size: 12px; color: var(--text2); margin-top: 2px; }
   .danger-zone { border-color: rgba(239,68,68,0.2); }
-  .danger-zone .settings-section-title { color: var(--red); }
 
-  /* MODALS */
-  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 1rem; }
-  .modal { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; }
-  .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 0.5rem; }
+  /* ── MODALS ───────────────────────────────── */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+  .modal { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; width: 100%; max-width: 540px; max-height: 90vh; overflow-y: auto; }
+  .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 0.4rem; }
   .modal-sub { font-size: 13px; color: var(--text2); margin-bottom: 1.5rem; }
   .modal-footer { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem; }
   .step-indicator { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
   .step { flex: 1; height: 3px; background: var(--bg4); border-radius: 2px; transition: background 0.3s; }
   .step.done { background: var(--green); }
   .step.active { background: var(--purple); }
-  .section-label { font-size: 12px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 0.75rem; margin-top: 1rem; }
-  .repo-list { display: flex; flex-direction: column; gap: 0.5rem; max-height: 200px; overflow-y: auto; margin-bottom: 1rem; }
-  .repo-item { padding: 10px 12px; background: var(--bg3); border-radius: 8px; border: 1px solid transparent; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 10px; font-size: 13px; }
-  .repo-item:hover { border-color: var(--purple); }
+  .section-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 0.75rem; margin-top: 1rem; }
+  .repo-list { display: flex; flex-direction: column; gap: 4px; max-height: 260px; overflow-y: auto; margin-bottom: 1rem; padding-right: 2px; }
+  .repo-list::-webkit-scrollbar { width: 4px; }
+  .repo-list::-webkit-scrollbar-track { background: var(--bg3); border-radius: 2px; }
+  .repo-list::-webkit-scrollbar-thumb { background: var(--purple); border-radius: 2px; }
+  .repo-item { padding: 10px 12px; background: var(--bg3); border-radius: 8px; border: 1.5px solid transparent; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 10px; }
+  .repo-item:hover { border-color: rgba(124,58,237,0.4); background: var(--bg4); }
   .repo-item.selected { border-color: var(--purple); background: rgba(124,58,237,0.1); }
-  .repo-icon { width: 28px; height: 28px; background: var(--bg4); border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .repo-icon { width: 30px; height: 30px; background: var(--bg4); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
   .domain-row { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1rem; }
   .domain-input-wrap { flex: 1; display: flex; align-items: center; background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; overflow: hidden; }
-  .domain-prefix { padding: 10px 12px; color: var(--text3); font-family: var(--mono); font-size: 13px; border-right: 1px solid var(--border2); }
-  .domain-input { flex: 1; padding: 10px; background: none; border: none; color: var(--text); font-family: var(--mono); font-size: 13px; outline: none; }
-  .domain-suffix { padding: 10px 12px; color: var(--text3); font-family: var(--mono); font-size: 13px; border-left: 1px solid var(--border2); }
-  .custom-domain-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
-  .custom-domain-input { flex: 1; }
+  .domain-prefix { padding: 10px 12px; color: var(--text3); font-family: var(--mono); font-size: 12px; border-right: 1px solid var(--border2); white-space: nowrap; }
+  .domain-input { flex: 1; padding: 10px; background: none; border: none; color: var(--text); font-family: var(--mono); font-size: 13px; outline: none; min-width: 80px; }
+  .domain-suffix { padding: 10px 12px; color: var(--text3); font-family: var(--mono); font-size: 12px; border-left: 1px solid var(--border2); white-space: nowrap; }
   .domain-status { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: var(--bg3); border-radius: 8px; font-size: 13px; margin-bottom: 0.75rem; }
   .plan-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem; }
   .plan-card { padding: 1rem; background: var(--bg3); border-radius: 10px; border: 1.5px solid transparent; cursor: pointer; transition: all 0.15s; }
@@ -217,50 +210,61 @@
   .plan-name { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
   .plan-price { font-family: var(--mono); font-size: 20px; font-weight: 700; color: var(--purple-light); }
   .plan-price span { font-size: 12px; color: var(--text2); font-family: sans-serif; font-weight: 400; }
-  .plan-feat { font-size: 12px; color: var(--text2); margin-top: 6px; }
-  .alert-box { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 1rem; display: flex; align-items: flex-start; gap: 8px; }
+  .plan-feat { font-size: 12px; color: var(--text2); margin-top: 6px; line-height: 1.6; }
+  .alert-box { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 1rem; display: flex; align-items: flex-start; gap: 8px; line-height: 1.5; }
   .alert-info { background: rgba(124,58,237,0.1); border: 1px solid rgba(124,58,237,0.25); color: var(--purple-light); }
   .alert-success { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.25); color: var(--green); }
   .alert-warning { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.25); color: var(--amber); }
+  .select-input { width: 100%; padding: 10px 14px; background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; color: var(--text); font-size: 13px; outline: none; cursor: pointer; }
+  .select-input:focus { border-color: var(--purple); }
+  .summary-box { background: var(--bg3); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; font-size: 13px; }
+  .summary-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
+  .summary-row:last-child { margin-bottom: 0; }
+  .summary-key { color: var(--text2); }
+  .summary-val { font-family: var(--mono); color: var(--text); }
+  .log-box { background: #060610; border: 1px solid var(--border2); border-radius: 8px; padding: 1rem; font-family: var(--mono); font-size: 12px; line-height: 1.8; max-height: 180px; overflow-y: auto; }
+  .log-line { color: var(--text2); }
+  .log-line.success { color: var(--green); }
+  .log-line.info { color: var(--purple-light); }
+  .log-line.warn { color: var(--amber); }
 
-  /* ADMIN */
+  /* ── GITHUB CONNECT MODAL ─────────────────── */
+  .github-connect-box { text-align: center; padding: 1rem 0; }
+  .github-big-icon { font-size: 56px; margin-bottom: 1rem; }
+  .github-connect-box h3 { font-size: 18px; font-weight: 700; margin-bottom: 0.5rem; }
+  .github-connect-box p { color: var(--text2); font-size: 14px; margin-bottom: 1.5rem; line-height: 1.6; }
+  .github-features { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1.5rem; text-align: left; }
+  .github-feature { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: var(--bg3); border-radius: 8px; font-size: 13px; color: var(--text2); }
+
+  /* ── ADMIN ────────────────────────────────── */
   .admin-section { background: var(--bg2); border: 1px solid var(--border2); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
   .admin-section-title { font-size: 15px; font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
   .admin-table { width: 100%; border-collapse: collapse; font-size: 13px; }
   .admin-table th { text-align: left; padding: 8px 12px; color: var(--text3); font-weight: 500; border-bottom: 1px solid var(--border2); }
   .admin-table td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.04); }
   .admin-table tr:last-child td { border-bottom: none; }
-  .toggle { position: relative; width: 36px; height: 20px; }
+  .toggle { position: relative; width: 36px; height: 20px; display: inline-block; }
   .toggle input { opacity: 0; width: 0; height: 0; }
   .toggle-slider { position: absolute; inset: 0; background: var(--bg4); border-radius: 20px; cursor: pointer; transition: 0.2s; }
   .toggle-slider:before { content: ''; position: absolute; width: 14px; height: 14px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.2s; }
   .toggle input:checked + .toggle-slider { background: var(--purple); }
   .toggle input:checked + .toggle-slider:before { transform: translateX(16px); }
-  .log-box { background: #080810; border: 1px solid var(--border2); border-radius: 8px; padding: 1rem; font-family: var(--mono); font-size: 12px; line-height: 1.8; max-height: 200px; overflow-y: auto; }
-  .log-line { color: var(--text2); }
-  .log-line.success { color: var(--green); }
-  .log-line.info { color: var(--purple-light); }
-  .log-line.warn { color: var(--amber); }
-  .settings-page-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .settings-page-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); gap: 1rem; }
   .settings-page-row:last-child { border-bottom: none; }
   .settings-plabel { font-size: 14px; font-weight: 500; }
   .settings-pdesc { font-size: 12px; color: var(--text2); margin-top: 2px; }
   .danger-page-zone { border-color: rgba(239,68,68,0.2); }
-  .danger-page-zone .admin-section-title { color: var(--red); }
-  .empty-state { text-align: center; padding: 4rem 2rem; }
-  .empty-icon { font-size: 48px; margin-bottom: 1rem; }
-  .empty-title { font-size: 18px; font-weight: 600; margin-bottom: 0.5rem; }
-  .empty-sub { color: var(--text2); font-size: 14px; margin-bottom: 1.5rem; }
+  .proj-domain-msg { display:none; margin-top: 0.75rem; }
 </style>
 </head>
 <body>
 
-<!-- FIREBASE SDK -->
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
-<!-- AUTH SCREEN -->
+<!-- ════════════ AUTH SCREEN ════════════ -->
 <div id="auth-screen">
   <div class="auth-box">
     <div class="logo">
@@ -272,65 +276,45 @@
       <div class="auth-tab" onclick="switchTab('register')">Registrarse</div>
     </div>
     <div id="tab-login">
-      <div class="form-group">
-        <label class="form-label">Correo electrónico</label>
-        <input type="email" id="login-email" class="form-input" placeholder="tu@correo.com" />
-      </div>
-      <div class="form-group">
-        <label class="form-label">Contraseña</label>
-        <input type="password" id="login-password" class="form-input" placeholder="••••••••" />
-      </div>
+      <div class="form-group"><label class="form-label">Correo</label><input type="email" id="login-email" class="form-input" placeholder="tu@correo.com"/></div>
+      <div class="form-group"><label class="form-label">Contraseña</label><input type="password" id="login-password" class="form-input" placeholder="••••••••"/></div>
       <button class="btn-primary" onclick="doLogin()">Entrar</button>
       <div class="auth-error" id="login-error"></div>
     </div>
-    <div id="tab-register" style="display:none;">
-      <div class="form-group">
-        <label class="form-label">Nombre</label>
-        <input type="text" id="reg-name" class="form-input" placeholder="Tu nombre" />
-      </div>
-      <div class="form-group">
-        <label class="form-label">Correo electrónico</label>
-        <input type="email" id="reg-email" class="form-input" placeholder="tu@correo.com" />
-      </div>
-      <div class="form-group">
-        <label class="form-label">Contraseña</label>
-        <input type="password" id="reg-password" class="form-input" placeholder="••••••••" />
-      </div>
+    <div id="tab-register" style="display:none">
+      <div class="form-group"><label class="form-label">Nombre</label><input type="text" id="reg-name" class="form-input" placeholder="Tu nombre"/></div>
+      <div class="form-group"><label class="form-label">Correo</label><input type="email" id="reg-email" class="form-input" placeholder="tu@correo.com"/></div>
+      <div class="form-group"><label class="form-label">Contraseña</label><input type="password" id="reg-password" class="form-input" placeholder="••••••••"/></div>
       <button class="btn-primary" onclick="doRegister()">Crear cuenta</button>
       <div class="auth-error" id="reg-error"></div>
     </div>
   </div>
 </div>
 
-<!-- APP -->
+<!-- ════════════ APP ════════════ -->
 <div id="app">
   <nav class="topbar">
     <div class="topbar-logo" onclick="goToDashboard()">
-      <div class="logo-icon">D</div>
-      DeployOS
+      <div class="logo-icon">D</div>DeployOS
     </div>
     <div class="topbar-nav">
       <button class="nav-btn active" id="nav-dashboard" onclick="showPage('dashboard',this)">Dashboard</button>
-      <button class="nav-btn" id="nav-settings-page" onclick="showPage('settings',this)">Configuración</button>
+      <button class="nav-btn" onclick="showPage('settings',this)">Configuración</button>
       <button class="nav-btn admin-only" style="display:none" onclick="showPage('admin',this)">⚡ Admin</button>
     </div>
     <div class="topbar-right">
-      <div class="user-pill">
-        <div class="user-dot"></div>
-        <span id="user-display">Usuario</span>
-      </div>
+      <div class="github-badge" id="github-badge"></div>
+      <div class="user-pill"><div class="user-dot"></div><span id="user-display">Usuario</span></div>
       <button class="btn-sm btn-ghost" onclick="doLogout()">Salir</button>
     </div>
   </nav>
+
   <main class="main">
 
     <!-- DASHBOARD -->
     <div id="page-dashboard" class="page active">
       <div class="dash-header">
-        <div>
-          <div class="dash-title">Mis sitios</div>
-          <div class="dash-sub">Gestiona tus despliegues</div>
-        </div>
+        <div><div class="dash-title">Mis sitios</div><div class="dash-sub">Gestiona tus despliegues</div></div>
         <button class="btn-sm btn-purple" onclick="openNewSite()">+ Nuevo sitio</button>
       </div>
       <div class="stats-row">
@@ -341,50 +325,37 @@
       <div class="empty-state" id="empty-state">
         <div class="empty-icon">🚀</div>
         <div class="empty-title">Sin sitios todavía</div>
-        <div class="empty-sub">Crea tu primer sitio y conéctalo a GitHub</div>
+        <div class="empty-sub">Conecta GitHub y despliega tu primer sitio en segundos</div>
         <button class="btn-sm btn-purple" onclick="openNewSite()">+ Crear primer sitio</button>
       </div>
-      <div class="sites-grid" id="sites-grid" style="display:none;"></div>
+      <div class="sites-grid" id="sites-grid" style="display:none"></div>
     </div>
 
-    <!-- PROJECT PAGE (estilo Vercel) -->
+    <!-- PROJECT PAGE -->
     <div id="page-project" class="page">
       <div class="project-header">
         <button class="project-back" onclick="goToDashboard()">← Volver</button>
         <div style="flex:1">
-          <div style="display:flex;align-items:center;gap:10px;">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
             <div class="dash-title" id="proj-title">Sitio</div>
             <span class="badge badge-green" id="proj-status-badge">● Activo</span>
           </div>
           <a class="project-domain-link" id="proj-domain-link" href="#" target="_blank">—</a>
         </div>
         <button class="btn-sm btn-ghost" onclick="redeployCurrent()">🔄 Redesplegar</button>
-        <button class="btn-sm btn-purple" onclick="window.open(currentSite && currentSite.previewUrl || '#','_blank')">🔗 Ver sitio</button>
+        <button class="btn-sm btn-purple" onclick="window.open('https://'+(currentSite&&currentSite.domain||''),'_blank')">🔗 Ver sitio</button>
       </div>
 
-      <!-- TABS estilo Vercel -->
       <div class="project-tabs">
-        <button class="project-tab active" onclick="switchProjectTab('preview',this)">
-          <span class="project-tab-icon">👁</span> Vista previa
-        </button>
-        <button class="project-tab" onclick="switchProjectTab('deployments',this)">
-          <span class="project-tab-icon">🚀</span> Despliegues
-        </button>
-        <button class="project-tab" onclick="switchProjectTab('analytics',this)">
-          <span class="project-tab-icon">📊</span> Analíticas
-        </button>
-        <button class="project-tab" onclick="switchProjectTab('domains',this)">
-          <span class="project-tab-icon">🌐</span> Dominios
-        </button>
-        <button class="project-tab" onclick="switchProjectTab('environment',this)">
-          <span class="project-tab-icon">⚙️</span> Variables de entorno
-        </button>
-        <button class="project-tab" onclick="switchProjectTab('project-settings',this)">
-          <span class="project-tab-icon">🔧</span> Ajustes
-        </button>
+        <button class="project-tab active" onclick="switchProjectTab('preview',this)">👁 Vista previa</button>
+        <button class="project-tab" onclick="switchProjectTab('deployments',this)">🚀 Despliegues</button>
+        <button class="project-tab" onclick="switchProjectTab('analytics',this)">📊 Analíticas</button>
+        <button class="project-tab" onclick="switchProjectTab('domains',this)">🌐 Dominios</button>
+        <button class="project-tab" onclick="switchProjectTab('environment',this)">⚙️ Variables de entorno</button>
+        <button class="project-tab" onclick="switchProjectTab('project-settings',this)">🔧 Ajustes</button>
       </div>
 
-      <!-- TAB: VISTA PREVIA -->
+      <!-- TAB: PREVIEW -->
       <div id="tab-preview" class="tab-content active">
         <div class="preview-container">
           <div class="preview-toolbar">
@@ -394,25 +365,24 @@
               <div class="browser-dot green"></div>
             </div>
             <div class="browser-url-bar">
-              <span class="lock">🔒</span>
+              <span style="color:var(--green);font-size:11px;">🔒</span>
               <span id="preview-url-text">https://mi-sitio.deployos.app</span>
             </div>
             <div class="preview-toolbar-actions">
               <div class="preview-size-btns">
                 <button class="size-btn active" onclick="setPreviewSize('100%','100%',this)" title="Desktop">🖥</button>
                 <button class="size-btn" onclick="setPreviewSize('768px','100%',this)" title="Tablet">📱</button>
-                <button class="size-btn" onclick="setPreviewSize('375px','100%',this)" title="Mobile">📲</button>
+                <button class="size-btn" onclick="setPreviewSize('375px','100%',this)" title="Móvil">📲</button>
               </div>
               <button class="btn-sm btn-ghost" style="padding:4px 10px;font-size:12px;" onclick="refreshPreview()">↻</button>
             </div>
           </div>
           <div class="preview-viewport" id="preview-viewport">
             <div class="preview-placeholder" id="preview-placeholder">
-              <div class="preview-placeholder-icon">🌐</div>
-              <div class="preview-placeholder-text">Vista previa del sitio</div>
-              <div class="preview-placeholder-sub" id="preview-placeholder-sub">deploy activo</div>
+              <div style="font-size:36px;">🌐</div>
+              <div style="font-size:14px;color:#666;">Cargando vista previa...</div>
             </div>
-            <iframe id="preview-iframe" style="display:none;" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+            <iframe id="preview-iframe" style="display:none;" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
           </div>
         </div>
       </div>
@@ -429,148 +399,88 @@
       <!-- TAB: ANALYTICS -->
       <div id="tab-analytics" class="tab-content">
         <div class="analytics-grid">
-          <div class="analytics-card">
-            <div class="analytics-label">Visitas únicas</div>
-            <div class="analytics-value" id="ana-visits" style="color:var(--purple-light)">—</div>
-            <div class="analytics-change" id="ana-visits-change">+12% este mes</div>
-          </div>
-          <div class="analytics-card">
-            <div class="analytics-label">Page views</div>
-            <div class="analytics-value" id="ana-views" style="color:var(--green)">—</div>
-            <div class="analytics-change" id="ana-views-change">+8% este mes</div>
-          </div>
-          <div class="analytics-card">
-            <div class="analytics-label">Tiempo promedio</div>
-            <div class="analytics-value" id="ana-time" style="color:var(--amber)">—</div>
-            <div class="analytics-change down">-3% este mes</div>
-          </div>
-          <div class="analytics-card">
-            <div class="analytics-label">Tasa de rebote</div>
-            <div class="analytics-value" id="ana-bounce" style="color:var(--text)">—</div>
-            <div class="analytics-change">-5% este mes</div>
-          </div>
+          <div class="analytics-card"><div class="analytics-label">Visitas únicas</div><div class="analytics-value" id="ana-visits" style="color:var(--purple-light)">—</div><div class="analytics-change">+12% este mes</div></div>
+          <div class="analytics-card"><div class="analytics-label">Page views</div><div class="analytics-value" id="ana-views" style="color:var(--green)">—</div><div class="analytics-change">+8% este mes</div></div>
+          <div class="analytics-card"><div class="analytics-label">Tiempo promedio</div><div class="analytics-value" id="ana-time" style="color:var(--amber)">—</div><div class="analytics-change down">-3%</div></div>
+          <div class="analytics-card"><div class="analytics-label">Tasa de rebote</div><div class="analytics-value" id="ana-bounce" style="color:var(--text)">—</div><div class="analytics-change">-5%</div></div>
         </div>
         <div class="chart-placeholder">
-          <div class="chart-title">Visitas diarias (últimos 30 días)</div>
+          <div class="chart-title">Visitas diarias — últimos 30 días</div>
           <div class="mini-bars" id="mini-bars"></div>
         </div>
       </div>
 
-      <!-- TAB: DOMINIOS -->
+      <!-- TAB: DOMAINS -->
       <div id="tab-domains" class="tab-content">
         <div class="domains-list" id="proj-domains-list"></div>
         <div class="domain-add-row">
-          <input class="form-input" id="proj-add-domain-input" placeholder="nuevo-dominio.com" style="flex:1;" />
-          <button class="btn-sm btn-purple" onclick="addDomainToProject()">Añadir dominio</button>
+          <input class="form-input" id="proj-add-domain-input" placeholder="nuevo-dominio.com" style="flex:1"/>
+          <button class="btn-sm btn-purple" onclick="addDomainToProject()">Añadir</button>
         </div>
-        <div id="proj-domain-msg" class="alert-box" style="display:none;margin-top:0.75rem;"></div>
+        <div id="proj-domain-msg" class="alert-box proj-domain-msg"></div>
       </div>
 
-      <!-- TAB: VARIABLES DE ENTORNO -->
+      <!-- TAB: ENVIRONMENT -->
       <div id="tab-environment" class="tab-content">
-        <div style="margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
           <div style="font-size:14px;color:var(--text2)">Variables disponibles en build y runtime</div>
           <button class="btn-sm btn-ghost" onclick="addEnvVar()">+ Añadir variable</button>
         </div>
         <div class="env-list" id="env-list">
-          <div class="env-item" style="border-radius:10px;border-bottom:1px solid var(--border2);">
-            <div class="env-key">NODE_ENV</div>
-            <div style="display:flex;gap:8px;align-items:center;">
-              <span class="badge badge-green env-env-badge">Production</span>
-              <div class="env-value">production</div>
-            </div>
-          </div>
-          <div class="env-item" style="border-radius:10px;border-bottom:1px solid var(--border2);margin-top:6px;">
-            <div class="env-key">NEXT_PUBLIC_API_URL</div>
-            <div style="display:flex;gap:8px;align-items:center;">
-              <span class="badge badge-amber env-env-badge">All</span>
-              <div class="env-value">••••••••••••</div>
-            </div>
-          </div>
+          <div class="env-item"><div class="env-key">NODE_ENV</div><div style="display:flex;gap:8px;align-items:center;"><span class="badge badge-green" style="font-size:10px;">Production</span><div class="env-value">production</div></div></div>
+          <div class="env-item"><div class="env-key">NEXT_PUBLIC_API_URL</div><div style="display:flex;gap:8px;align-items:center;"><span class="badge badge-amber" style="font-size:10px;">All</span><div class="env-value">••••••••••••</div></div></div>
         </div>
       </div>
 
-      <!-- TAB: AJUSTES DEL PROYECTO -->
+      <!-- TAB: PROJECT SETTINGS -->
       <div id="tab-project-settings" class="tab-content">
         <div class="settings-section">
           <div class="settings-section-title">General</div>
-          <div class="settings-row">
-            <div><div class="settings-label">Nombre del proyecto</div><div class="settings-desc" id="proj-setting-name">—</div></div>
-            <button class="btn-sm btn-ghost">Editar</button>
-          </div>
-          <div class="settings-row">
-            <div><div class="settings-label">Repositorio</div><div class="settings-desc" id="proj-setting-repo">—</div></div>
-            <button class="btn-sm btn-ghost">Cambiar</button>
-          </div>
-          <div class="settings-row">
-            <div><div class="settings-label">Rama de producción</div><div class="settings-desc">main</div></div>
-            <button class="btn-sm btn-ghost">Editar</button>
-          </div>
+          <div class="settings-row"><div><div class="settings-label">Nombre del proyecto</div><div class="settings-desc" id="proj-setting-name">—</div></div><button class="btn-sm btn-ghost">Editar</button></div>
+          <div class="settings-row"><div><div class="settings-label">Repositorio</div><div class="settings-desc" id="proj-setting-repo">—</div></div><button class="btn-sm btn-ghost">Cambiar</button></div>
+          <div class="settings-row"><div><div class="settings-label">Rama de producción</div><div class="settings-desc" id="proj-setting-branch">main</div></div><button class="btn-sm btn-ghost">Editar</button></div>
         </div>
         <div class="settings-section">
-          <div class="settings-section-title">Build & Output</div>
-          <div class="settings-row">
-            <div><div class="settings-label">Framework</div><div class="settings-desc" id="proj-setting-framework">Autodetectado</div></div>
-            <button class="btn-sm btn-ghost">Configurar</button>
-          </div>
-          <div class="settings-row">
-            <div><div class="settings-label">Comando de build</div><div class="settings-desc" style="font-family:var(--mono);font-size:11px;">npm run build</div></div>
-            <button class="btn-sm btn-ghost">Editar</button>
-          </div>
-          <div class="settings-row">
-            <div><div class="settings-label">Directorio de salida</div><div class="settings-desc" style="font-family:var(--mono);font-size:11px;">./dist</div></div>
-            <button class="btn-sm btn-ghost">Editar</button>
-          </div>
+          <div class="settings-section-title">Build &amp; Output</div>
+          <div class="settings-row"><div><div class="settings-label">Framework</div><div class="settings-desc" id="proj-setting-framework">Autodetectado</div></div><button class="btn-sm btn-ghost">Configurar</button></div>
+          <div class="settings-row"><div><div class="settings-label">Comando de build</div><div class="settings-desc" id="proj-setting-buildcmd" style="font-family:var(--mono);font-size:11px;">npm run build</div></div><button class="btn-sm btn-ghost">Editar</button></div>
+          <div class="settings-row"><div><div class="settings-label">Directorio de salida</div><div class="settings-desc" id="proj-setting-outdir" style="font-family:var(--mono);font-size:11px;">./dist</div></div><button class="btn-sm btn-ghost">Editar</button></div>
         </div>
         <div class="settings-section danger-zone">
-          <div class="settings-section-title" style="color:var(--red);">⚠️ Zona de peligro</div>
-          <div class="settings-row">
-            <div><div class="settings-label">Eliminar proyecto</div><div class="settings-desc">Esta acción no se puede deshacer</div></div>
-            <button class="btn-sm btn-danger" onclick="deleteCurrentSite()">Eliminar</button>
-          </div>
+          <div class="settings-section-title" style="color:var(--red)">⚠️ Zona de peligro</div>
+          <div class="settings-row"><div><div class="settings-label">Eliminar proyecto</div><div class="settings-desc">Esta acción no se puede deshacer</div></div><button class="btn-sm btn-danger" onclick="deleteCurrentSite()">Eliminar</button></div>
         </div>
       </div>
     </div>
 
-    <!-- SETTINGS GLOBALES -->
+    <!-- SETTINGS -->
     <div id="page-settings" class="page">
-      <div class="dash-header">
-        <div><div class="dash-title">Configuración</div><div class="dash-sub">Cuenta y preferencias</div></div>
-      </div>
+      <div class="dash-header"><div><div class="dash-title">Configuración</div><div class="dash-sub">Cuenta y preferencias</div></div></div>
       <div class="admin-section">
         <div class="admin-section-title">👤 Perfil</div>
-        <div class="settings-page-row">
-          <div><div class="settings-plabel">Nombre</div><div class="settings-pdesc" id="settings-name">—</div></div>
-        </div>
-        <div class="settings-page-row">
-          <div><div class="settings-plabel">Email</div><div class="settings-pdesc" id="settings-email">—</div></div>
-        </div>
-        <div class="settings-page-row">
-          <div><div class="settings-plabel">Plan actual</div><div class="settings-pdesc" id="settings-plan">Free</div></div>
-          <button class="btn-sm btn-purple" onclick="openModal('modal-upgrade')">Mejorar plan</button>
-        </div>
+        <div class="settings-page-row"><div><div class="settings-plabel">Nombre</div><div class="settings-pdesc" id="settings-name">—</div></div></div>
+        <div class="settings-page-row"><div><div class="settings-plabel">Email</div><div class="settings-pdesc" id="settings-email">—</div></div></div>
+        <div class="settings-page-row"><div><div class="settings-plabel">Plan actual</div><div class="settings-pdesc" id="settings-plan">Free</div></div><button class="btn-sm btn-purple" onclick="openModal('modal-upgrade')">Mejorar plan</button></div>
       </div>
       <div class="admin-section">
-        <div class="admin-section-title">🔗 Conexiones</div>
+        <div class="admin-section-title">🐙 GitHub</div>
         <div class="settings-page-row">
-          <div><div class="settings-plabel">GitHub</div><div class="settings-pdesc" id="github-status">No conectado</div></div>
-          <button class="btn-sm btn-ghost" onclick="document.getElementById('github-status').textContent='✅ Conectado como @tu-usuario'">Conectar</button>
+          <div><div class="settings-plabel">Cuenta de GitHub</div><div class="settings-pdesc" id="github-status">No conectado</div></div>
+          <button class="btn-sm btn-github" id="btn-settings-github" onclick="openModal('modal-github-connect')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+            Conectar GitHub
+          </button>
         </div>
       </div>
       <div class="admin-section danger-page-zone">
-        <div class="admin-section-title" style="color:var(--red);">⚠️ Zona de peligro</div>
-        <div class="settings-page-row">
-          <div><div class="settings-plabel">Eliminar cuenta</div><div class="settings-pdesc">Elimina todos tus sitios y datos permanentemente</div></div>
-          <button class="btn-sm btn-danger">Eliminar</button>
-        </div>
+        <div class="admin-section-title" style="color:var(--red)">⚠️ Zona de peligro</div>
+        <div class="settings-page-row"><div><div class="settings-plabel">Eliminar cuenta</div><div class="settings-pdesc">Elimina todos tus sitios y datos permanentemente</div></div><button class="btn-sm btn-danger">Eliminar</button></div>
       </div>
     </div>
 
     <!-- ADMIN -->
     <div id="page-admin" class="page">
-      <div class="dash-header">
-        <div><div class="dash-title">⚡ Panel de administrador</div><div class="dash-sub">Control total de la plataforma</div></div>
-      </div>
+      <div class="dash-header"><div><div class="dash-title">⚡ Panel de administrador</div><div class="dash-sub">Control total de la plataforma</div></div></div>
       <div class="stats-row">
         <div class="stat-card"><div class="stat-label">Usuarios totales</div><div class="stat-val purple" id="admin-stat-users">—</div></div>
         <div class="stat-card"><div class="stat-label">Sitios totales</div><div class="stat-val green" id="admin-stat-sites">—</div></div>
@@ -584,79 +494,112 @@
         </table>
       </div>
       <div class="admin-section">
-        <div class="admin-section-title">🌐 Todos los sitios</div>
-        <table class="admin-table">
-          <thead><tr><th>Sitio</th><th>Estado</th><th>Dominio</th></tr></thead>
-          <tbody id="all-sites-tbody"><tr><td colspan="3" style="color:var(--text3);text-align:center;padding:1.5rem">Sin sitios registrados</td></tr></tbody>
-        </table>
-      </div>
-      <div class="admin-section">
-        <div class="admin-section-title">⚙️ Configuración de plataforma</div>
-        <div class="settings-page-row">
-          <div><div class="settings-plabel">Modo mantenimiento</div><div class="settings-pdesc">Bloquea nuevos accesos</div></div>
-          <label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label>
-        </div>
-        <div class="settings-page-row">
-          <div><div class="settings-plabel">Registro abierto</div><div class="settings-pdesc">Permite nuevos registros</div></div>
-          <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
-        </div>
+        <div class="admin-section-title">⚙️ Plataforma</div>
+        <div class="settings-page-row"><div><div class="settings-plabel">Modo mantenimiento</div><div class="settings-pdesc">Bloquea nuevos accesos</div></div><label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label></div>
+        <div class="settings-page-row"><div><div class="settings-plabel">Registro abierto</div><div class="settings-pdesc">Permite nuevos registros</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
       </div>
     </div>
+
   </main>
 </div>
 
-<!-- MODAL: NUEVO SITIO -->
-<div class="modal-overlay" id="modal-new-site" style="display:none;">
+<!-- ════════ MODAL: GITHUB CONNECT ════════ -->
+<div class="modal-overlay" id="modal-github-connect" style="display:none">
+  <div class="modal">
+    <div class="github-connect-box">
+      <div class="github-big-icon">🐙</div>
+      <h3>Conecta tu cuenta de GitHub</h3>
+      <p>Importa tus repositorios directamente y despliégalos con un clic. DeployOS detecta el framework automáticamente.</p>
+      <div class="github-features">
+        <div class="github-feature">📦 Importar repos</div>
+        <div class="github-feature">🔄 CI/CD automático</div>
+        <div class="github-feature">⎇ Deploy por rama</div>
+        <div class="github-feature">🔔 Notificaciones</div>
+      </div>
+      <button class="btn-sm btn-github" id="btn-connect-github" onclick="connectGitHub()" style="width:100%;justify-content:center;padding:12px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        Continuar con GitHub
+      </button>
+      <div style="margin-top:0.75rem;font-size:12px;color:var(--text3);">En modo demo: ingresa cualquier usuario público de GitHub</div>
+    </div>
+    <div class="modal-footer" style="margin-top:0.5rem;">
+      <button class="btn-sm btn-ghost" onclick="closeModal('modal-github-connect')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ MODAL: NUEVO SITIO ════════ -->
+<div class="modal-overlay" id="modal-new-site" style="display:none">
   <div class="modal">
     <div class="modal-title">🚀 Nuevo sitio</div>
-    <div class="modal-sub">Conecta tu repositorio y despliega en segundos</div>
+    <div class="modal-sub" id="modal-new-sub">Selecciona un repositorio de GitHub</div>
     <div class="step-indicator">
       <div class="step active" id="step1"></div>
       <div class="step" id="step2"></div>
       <div class="step" id="step3"></div>
     </div>
+
+    <!-- STEP 1: REPO -->
     <div id="new-step-1">
-      <div class="section-label">Repositorio de GitHub</div>
-      <input class="form-input" placeholder="Buscar repositorio..." id="repo-search" oninput="filterRepos()" style="margin-bottom:0.75rem" />
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:0.75rem;">
+        <div id="gh-user-mini" style="display:flex;align-items:center;gap:6px;background:var(--bg3);padding:5px 10px;border-radius:20px;font-size:12px;color:var(--text2);"></div>
+      </div>
+      <input class="form-input" placeholder="🔍 Buscar repositorio..." id="repo-search" oninput="filterRepos()" style="margin-bottom:0.75rem"/>
       <div class="repo-list" id="repo-list">
-        <div class="repo-item" onclick="selectRepo(this,'my-portfolio')" data-repo="my-portfolio"><div class="repo-icon">📁</div><div><b>my-portfolio</b><div style="font-size:11px;color:var(--text3)">HTML, CSS · hace 2h</div></div></div>
-        <div class="repo-item" onclick="selectRepo(this,'react-blog')" data-repo="react-blog"><div class="repo-icon">⚛️</div><div><b>react-blog</b><div style="font-size:11px;color:var(--text3)">React · ayer</div></div></div>
-        <div class="repo-item" onclick="selectRepo(this,'nextjs-shop')" data-repo="nextjs-shop"><div class="repo-icon">🛒</div><div><b>nextjs-shop</b><div style="font-size:11px;color:var(--text3)">Next.js · hace 3 días</div></div></div>
-        <div class="repo-item" onclick="selectRepo(this,'landing-page')" data-repo="landing-page"><div class="repo-icon">🎨</div><div><b>landing-page</b><div style="font-size:11px;color:var(--text3)">Vue · hace 1 semana</div></div></div>
-        <div class="repo-item" onclick="selectRepo(this,'api-backend')" data-repo="api-backend"><div class="repo-icon">⚙️</div><div><b>api-backend</b><div style="font-size:11px;color:var(--text3)">Node.js · hace 2 semanas</div></div></div>
+        <div style="text-align:center;padding:2rem;color:var(--text3);font-size:13px;">Cargando repositorios...</div>
       </div>
       <div class="modal-footer">
         <button class="btn-sm btn-ghost" onclick="closeModal('modal-new-site')">Cancelar</button>
         <button class="btn-sm btn-purple" onclick="goStep(2)">Siguiente →</button>
       </div>
     </div>
-    <div id="new-step-2" style="display:none;">
+
+    <!-- STEP 2: DOMAIN + FRAMEWORK -->
+    <div id="new-step-2" style="display:none">
       <div class="section-label">Subdominio gratuito</div>
       <div class="domain-row">
-        <div class="domain-input-wrap" style="flex:1;">
+        <div class="domain-input-wrap" style="flex:1">
           <span class="domain-prefix">https://</span>
-          <input class="domain-input" id="subdomain-input" placeholder="mi-sitio" oninput="checkDomain()" />
+          <input class="domain-input" id="subdomain-input" placeholder="mi-sitio" oninput="checkDomain()"/>
           <span class="domain-suffix">.deployos.app</span>
         </div>
       </div>
-      <div id="domain-check" class="domain-status" style="display:none;"></div>
-      <div class="section-label" style="margin-top:1.25rem;">Dominio personalizado <span class="badge badge-amber" id="custom-domain-badge">1° vez gratis</span></div>
-      <div class="custom-domain-row">
-        <input class="form-input custom-domain-input" id="custom-domain-input" placeholder="misitioweb.com" />
+      <div id="domain-check" class="domain-status" style="display:none"></div>
+
+      <div class="section-label" style="margin-top:1rem">Dominio personalizado <span class="badge badge-amber" id="custom-domain-badge" style="font-size:10px;">1° gratis</span></div>
+      <div style="display:flex;gap:8px;margin-bottom:0.5rem;">
+        <input class="form-input" id="custom-domain-input" placeholder="misitioweb.com" style="flex:1"/>
         <button class="btn-sm btn-ghost" onclick="addCustomDomain()">Añadir</button>
       </div>
-      <div id="custom-domain-info" class="alert-box" style="display:none;"></div>
+      <div id="custom-domain-info" class="alert-box" style="display:none"></div>
+
+      <div class="section-label" style="margin-top:1rem">Framework</div>
+      <select class="select-input" id="framework-select" onchange="updateBuildCommand()">
+        <option value="static">HTML/CSS estático</option>
+        <option value="react">React (CRA)</option>
+        <option value="nextjs">Next.js</option>
+        <option value="vue">Vue / Nuxt</option>
+        <option value="svelte">Svelte / SvelteKit</option>
+        <option value="other">Otro (Node.js)</option>
+      </select>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <div style="flex:1;background:var(--bg3);border-radius:6px;padding:8px 10px;font-size:12px;color:var(--text2);">Build: <span id="build-cmd-display" style="font-family:var(--mono);color:var(--text);">—</span></div>
+        <div style="flex:1;background:var(--bg3);border-radius:6px;padding:8px 10px;font-size:12px;color:var(--text2);">Output: <span id="output-dir-display" style="font-family:var(--mono);color:var(--text);">—</span></div>
+      </div>
       <div class="modal-footer">
         <button class="btn-sm btn-ghost" onclick="goStep(1)">← Atrás</button>
         <button class="btn-sm btn-purple" onclick="goStep(3)">Siguiente →</button>
       </div>
     </div>
-    <div id="new-step-3" style="display:none;">
+
+    <!-- STEP 3: CONFIRM + DEPLOY -->
+    <div id="new-step-3" style="display:none">
       <div class="section-label">Resumen</div>
-      <div style="background:var(--bg3);border-radius:8px;padding:1rem;margin-bottom:1rem;font-size:13px;">
-        <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="color:var(--text2)">Repositorio</span><span id="summary-repo" style="font-family:var(--mono)">—</span></div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="color:var(--text2)">URL</span><span id="summary-url" style="font-family:var(--mono);color:var(--purple-light)">—</span></div>
-        <div style="display:flex;justify-content:space-between;"><span style="color:var(--text2)">Rama</span><span style="font-family:var(--mono)">main</span></div>
+      <div class="summary-box">
+        <div class="summary-row"><span class="summary-key">Repositorio</span><span class="summary-val" id="summary-repo">—</span></div>
+        <div class="summary-row"><span class="summary-key">Rama</span><span class="summary-val" id="summary-branch">main</span></div>
+        <div class="summary-row"><span class="summary-key">Framework</span><span class="summary-val" id="summary-framework">—</span></div>
+        <div class="summary-row"><span class="summary-key">URL</span><span class="summary-val" id="summary-url" style="color:var(--purple-light)">—</span></div>
       </div>
       <div class="section-label">Log de despliegue</div>
       <div class="log-box" id="deploy-log"><div class="log-line info">Listo para desplegar...</div></div>
@@ -668,30 +611,30 @@
   </div>
 </div>
 
-<!-- MODAL: UPGRADE -->
-<div class="modal-overlay" id="modal-upgrade" style="display:none;">
+<!-- ════════ MODAL: UPGRADE ════════ -->
+<div class="modal-overlay" id="modal-upgrade" style="display:none">
   <div class="modal">
     <div class="modal-title">⚡ Mejorar plan</div>
     <div class="modal-sub">Desbloquea más potencia para tus proyectos</div>
     <div class="plan-cards">
-      <div class="plan-card selected" onclick="selectPlan(this,'Free')">
+      <div class="plan-card selected" onclick="selectPlan(this)">
         <div class="plan-name">Free</div>
         <div class="plan-price">$0 <span>/mes</span></div>
-        <div class="plan-feat">• 3 sitios<br>• 1 dominio gratis<br>• Despliegue básico</div>
+        <div class="plan-feat">• 3 sitios<br>• 1 dominio gratis<br>• Deploy básico</div>
       </div>
-      <div class="plan-card" onclick="selectPlan(this,'Pro')">
+      <div class="plan-card" onclick="selectPlan(this)">
         <div class="plan-name">Pro ⭐</div>
         <div class="plan-price">$20 <span>/mes</span></div>
         <div class="plan-feat">• Sitios ilimitados<br>• Dominios ilimitados<br>• CI/CD avanzado</div>
       </div>
     </div>
     <div class="plan-cards">
-      <div class="plan-card" onclick="selectPlan(this,'Team')">
+      <div class="plan-card" onclick="selectPlan(this)">
         <div class="plan-name">Team</div>
         <div class="plan-price">$50 <span>/mes</span></div>
         <div class="plan-feat">• Todo de Pro<br>• Equipo incluido<br>• Analíticas</div>
       </div>
-      <div class="plan-card" onclick="selectPlan(this,'Enterprise')">
+      <div class="plan-card" onclick="selectPlan(this)">
         <div class="plan-name">Enterprise</div>
         <div class="plan-price">Custom</div>
         <div class="plan-feat">• Todo ilimitado<br>• SLA garantizado<br>• Soporte dedicado</div>
