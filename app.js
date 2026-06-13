@@ -275,7 +275,7 @@ function renderRepoList(filter) {
     const ago = timeAgo(r.updated_at);
     const badge = r.private ? '<span class="badge badge-gray" style="font-size:10px;">🔒 Privado</span>' : '';
     return `
-      <div class="repo-item" onclick="selectRepo(this,'${r.name}','${r.default_branch||'main'}','${r.language||''}','${r.full_name||r.name}')" data-repo="${r.name}">
+      <div class="repo-item" onclick="selectRepo(this,'${r.name}','${r.default_branch||'main'}','${r.language||''}','${r.full_name||r.name}','${(r.description||'').replace(/'/g,'')}','${r.stargazers_count||0}')" data-repo="${r.name}">
         <div class="repo-icon">${icon}</div>
         <div style="flex:1;min-width:0;">
           <div style="display:flex;align-items:center;gap:6px;"><b style="font-size:13px;">${r.name}</b>${badge}</div>
@@ -311,13 +311,15 @@ function filterRepos() {
   renderRepoList(q);
 }
 
-function selectRepo(el, repo, branch, lang, fullName) {
+function selectRepo(el, repo, branch, lang, fullName, desc, stars) {
   document.querySelectorAll('.repo-item').forEach(r => r.classList.remove('selected'));
   el.classList.add('selected');
   selectedRepo = repo;
   selectedRepoBranch = branch || 'main';
   selectedRepoLang = lang;
   selectedRepoFull = fullName;
+  selectedRepoDesc = desc || '';
+  selectedRepoStars = parseInt(stars) || 0;
   // Auto-rellenar subdominio con nombre del repo
   const subInput = document.getElementById('subdomain-input');
   if (!subInput.value) {
@@ -329,6 +331,8 @@ function selectRepo(el, repo, branch, lang, fullName) {
 let selectedRepoBranch = 'main';
 let selectedRepoLang = '';
 let selectedRepoFull = '';
+let selectedRepoDesc = '';
+let selectedRepoStars = 0;
 
 function goStep(n) {
   [1, 2, 3].forEach(i => {
@@ -438,6 +442,8 @@ function startDeploy() {
       repo: selectedRepoFull || selectedRepo,
       repoBranch: selectedRepoBranch || 'main',
       repoLang: selectedRepoLang,
+      repoDesc: selectedRepoDesc,
+      repoStars: selectedRepoStars,
       framework: framework,
       domain: sub + '.deployos.app',
       customDomain: cDomain || null,
@@ -532,7 +538,13 @@ function renderMiniPreview(i, site, color) {
   <footer>Powered by DeployOS</footer>
   </body></html>`;
   var iframe = document.createElement('iframe');
-  iframe.srcdoc = html;
+  var miniUrl = 'https://' + site.name.toLowerCase().replace(/[^a-z0-9-]/g,'') + '.github.io/' + (site.repo||'').split('/')[1] + '/';
+  var repoParts = (site.repo||'').split('/');
+  if (repoParts.length === 2) {
+    miniUrl = 'https://' + repoParts[0] + '.github.io/' + repoParts[1] + '/';
+  }
+  iframe.src = miniUrl;
+  iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
   iframe.style.cssText = 'width:200%;height:200%;transform:scale(0.5);transform-origin:top left;border:none;pointer-events:none;';
   container.appendChild(iframe);
 }
@@ -574,17 +586,25 @@ var _previewBlobUrl = null;
 
 function buildPreviewHTML(site) {
   var fwMap = { nextjs:'Next.js', react:'React', vue:'Vue', svelte:'Svelte', static:'HTML/CSS', other:'Node.js' };
-  var bgMap = { nextjs:'#000000', react:'#1e1e2e', vue:'#1a1a2a', svelte:'#1a0a0a', static:'#0f0f1a', other:'#0a0a0f' };
+  var bgMap = { nextjs:'#000000', react:'#0d1117', vue:'#0d1117', svelte:'#0d1117', static:'#0d1117', other:'#0d1117' };
   var acMap = { nextjs:'#ffffff', react:'#61dafb', vue:'#42b883', svelte:'#ff3e00', static:'#7c3aed', other:'#10b981' };
+  var iconMap = { nextjs:'▲', react:'⚛', vue:'◆', svelte:'◎', static:'◻', other:'⬡' };
   var fw = site.framework || 'static';
-  var bg = bgMap[fw] || '#0f0f1a';
+  var bg = bgMap[fw] || '#0d1117';
   var ac = acMap[fw] || '#7c3aed';
+  var icon = iconMap[fw] || '◻';
   var nm = (site.name || 'Mi Sitio').replace(/</g,'&lt;');
-  var rp = (site.repo || site.name || nm).replace(/</g,'&lt;');
+  var rp = (site.repo || nm).replace(/</g,'&lt;');
   var br = site.repoBranch || 'main';
   var fwLabel = fwMap[fw] || fw;
+  var desc = (site.repoDesc || '').replace(/</g,'&lt;') || 'Repositorio desplegado en DeployOS';
   var title = nm.replace(/-/g,' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); });
-  var txtColor = (fw === 'react' || fw === 'nextjs') ? '#000' : '#fff';
+  var stars = site.repoStars || 0;
+  var lang = site.repoLang || '';
+  var domain = site.domain || '';
+  var commit = (site.deployHistory && site.deployHistory[0] && site.deployHistory[0].commit) || 'a3f2b1c';
+  var langColor = { JavaScript:'#f1e05a', TypeScript:'#3178c6', HTML:'#e34c26', CSS:'#563d7c', Vue:'#42b883', Python:'#3572A5', React:'#61dafb' };
+  var lc = langColor[lang] || '#8b949e';
 
   var h = [];
   h.push('<!DOCTYPE html><html lang="es"><head>');
@@ -592,76 +612,139 @@ function buildPreviewHTML(site) {
   h.push('<title>' + nm + '</title>');
   h.push('<style>');
   h.push('*{margin:0;padding:0;box-sizing:border-box;}');
-  h.push('body{font-family:system-ui,sans-serif;background:' + bg + ';color:#f0f0ff;min-height:100vh;}');
-  h.push('nav{position:sticky;top:0;background:' + bg + 'ee;border-bottom:1px solid ' + ac + '44;padding:.75rem 2rem;display:flex;align-items:center;justify-content:space-between;}');
-  h.push('.brand{font-weight:700;font-size:1.1rem;color:' + ac + ';display:flex;align-items:center;gap:.5rem;}');
-  h.push('.dot{width:10px;height:10px;border-radius:50%;background:' + ac + ';}');
-  h.push('.nav-links{display:flex;gap:1.5rem;list-style:none;}');
-  h.push('.nav-links a{color:#a0a0c0;text-decoration:none;font-size:.875rem;}');
-  h.push('.hero{padding:5rem 2rem 4rem;text-align:center;background:radial-gradient(ellipse 80% 60% at 50% 0%,' + ac + '22,transparent);}');
-  h.push('.tag{display:inline-block;padding:.25rem .75rem;background:' + ac + '22;border:1px solid ' + ac + '44;border-radius:20px;font-size:.75rem;color:' + ac + ';margin-bottom:1.5rem;}');
-  h.push('h1{font-size:clamp(2rem,5vw,3.5rem);font-weight:800;line-height:1.1;margin-bottom:1rem;background:linear-gradient(135deg,#fff,' + ac + ');-webkit-background-clip:text;-webkit-text-fill-color:transparent;}');
-  h.push('.hero p{color:#a0a0c0;font-size:1rem;max-width:540px;margin:0 auto 2rem;line-height:1.6;}');
-  h.push('.btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;}');
-  h.push('.btn{display:inline-flex;align-items:center;padding:.65rem 1.5rem;border-radius:8px;font-weight:600;font-size:.875rem;text-decoration:none;transition:opacity .2s;}');
-  h.push('.btn1{background:' + ac + ';color:' + txtColor + ';}');
-  h.push('.btn2{background:transparent;border:1px solid ' + ac + '55;color:' + ac + ';}');
-  h.push('.stack{padding:1.5rem 2rem;display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;border-top:1px solid ' + ac + '15;border-bottom:1px solid ' + ac + '15;}');
-  h.push('.stag{padding:.3rem .85rem;background:' + bg + ';border:1px solid ' + ac + '33;border-radius:20px;font-size:.8rem;color:' + ac + ';}');
-  h.push('.features{padding:3rem 2rem;}');
-  h.push('.features h2{text-align:center;font-size:1.5rem;font-weight:700;margin-bottom:2rem;}');
-  h.push('.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;max-width:900px;margin:0 auto;}');
-  h.push('.card{background:' + bg + 'cc;border:1px solid ' + ac + '22;border-radius:12px;padding:1.5rem;transition:border-color .2s;}');
-  h.push('.card:hover{border-color:' + ac + '66;}');
-  h.push('.card-icon{font-size:1.75rem;margin-bottom:.75rem;}');
-  h.push('.card h3{font-size:1rem;font-weight:600;margin-bottom:.4rem;color:' + ac + ';}');
-  h.push('.card p{font-size:.8rem;color:#707090;line-height:1.5;}');
-  h.push('footer{padding:1.5rem 2rem;text-align:center;color:#404060;font-size:.75rem;border-top:1px solid ' + ac + '15;}');
-  h.push('.dbadge{display:inline-flex;align-items:center;gap:.4rem;padding:.25rem .65rem;background:' + bg + ';border:1px solid ' + ac + '33;border-radius:6px;font-size:.7rem;color:' + ac + ';margin-top:.5rem;}');
+  h.push('body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:#0d1117;color:#e6edf3;min-height:100vh;}');
+  h.push('a{color:inherit;text-decoration:none;}');
+  h.push('.topbar{background:#161b22;border-bottom:1px solid #30363d;padding:12px 24px;display:flex;align-items:center;gap:12px;}');
+  h.push('.logo{font-size:20px;color:#f0f6fc;font-weight:700;display:flex;align-items:center;gap:8px;}');
+  h.push('.logo-icon{width:28px;height:28px;background:' + ac + ';border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#000;font-weight:900;}');
+  h.push('.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500;border:1px solid;}');
+  h.push('.badge-green{background:#1f3a1f;border-color:#2ea04380;color:#3fb950;}');
+  h.push('.badge-fw{background:#' + ac.replace('#','') + '15;border-color:' + ac + '40;color:' + ac + ';}');
+  h.push('.repo-header{padding:28px 24px 0;max-width:980px;margin:0 auto;}');
+  h.push('.repo-path{font-size:18px;color:#e6edf3;margin-bottom:8px;}');
+  h.push('.repo-path .owner{color:#58a6ff;font-weight:400;}');
+  h.push('.repo-path .slash{color:#8b949e;margin:0 2px;}');
+  h.push('.repo-path .reponame{font-weight:600;}');
+  h.push('.repo-desc{color:#8b949e;font-size:14px;margin:8px 0 16px;}');
+  h.push('.repo-meta{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px;}');
+  h.push('.meta-item{display:flex;align-items:center;gap:5px;font-size:13px;color:#8b949e;}');
+  h.push('.lang-dot{width:10px;height:10px;border-radius:50%;background:' + lc + ';}');
+  h.push('.tab-bar{border-bottom:1px solid #30363d;display:flex;gap:0;padding:0 24px;max-width:980px;margin:0 auto;}');
+  h.push('.tab{padding:10px 16px;font-size:14px;color:#8b949e;border-bottom:2px solid transparent;cursor:pointer;}');
+  h.push('.tab.active{color:#e6edf3;border-bottom-color:' + ac + ';}');
+  h.push('.content{max-width:980px;margin:0 auto;padding:24px;display:grid;grid-template-columns:1fr 280px;gap:24px;}');
+  h.push('.file-box{background:#161b22;border:1px solid #30363d;border-radius:6px;overflow:hidden;}');
+  h.push('.file-header{background:#161b22;border-bottom:1px solid #30363d;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;}');
+  h.push('.commit-info{display:flex;align-items:center;gap:8px;font-size:13px;}');
+  h.push('.commit-hash{font-family:monospace;color:#58a6ff;font-size:12px;background:#1f2937;padding:2px 6px;border-radius:4px;}');
+  h.push('.file-list{font-size:13px;}');
+  h.push('.file-row{display:flex;align-items:center;gap:10px;padding:8px 16px;border-bottom:1px solid #21262d;color:#8b949e;}');
+  h.push('.file-row:last-child{border-bottom:none;}');
+  h.push('.file-row .fname{color:#58a6ff;flex:1;}');
+  h.push('.file-row .fmsg{flex:2;color:#8b949e;}');
+  h.push('.file-row .fdate{color:#6e7681;font-size:12px;}');
+  h.push('.sidebar{display:flex;flex-direction:column;gap:16px;}');
+  h.push('.side-box{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:16px;}');
+  h.push('.side-box h3{font-size:14px;font-weight:600;margin-bottom:10px;color:#e6edf3;}');
+  h.push('.side-box p{font-size:13px;color:#8b949e;line-height:1.5;}');
+  h.push('.deploy-status{display:flex;align-items:center;gap:8px;font-size:13px;padding:8px 0;}');
+  h.push('.status-dot{width:8px;height:8px;border-radius:50%;background:#3fb950;}');
+  h.push('.deploy-url{color:#58a6ff;font-size:13px;word-break:break-all;}');
+  h.push('.topic{display:inline-block;background:#1f3a5f;color:#58a6ff;border-radius:20px;padding:3px 10px;font-size:12px;margin:2px;}');
   h.push('</style></head><body>');
-  h.push('<nav><div class="brand"><div class="dot"></div>' + nm + '</div>');
-  h.push('<ul class="nav-links"><li><a href="#">Inicio</a></li><li><a href="#">Proyectos</a></li><li><a href="#">Sobre mi</a></li><li><a href="#">Contacto</a></li></ul></nav>');
-  h.push('<section class="hero">');
-  h.push('<div class="tag">Desplegado con DeployOS</div>');
-  h.push('<h1>' + title + '</h1>');
-  h.push('<p>Proyecto construido con ' + fwLabel + ' desde el repositorio <strong>' + rp + '</strong>.</p>');
-  h.push('<div class="btns"><a href="https://github.com/' + rp + '" class="btn btn1" target="_blank">Ver en GitHub</a><a href="#features" class="btn btn2">Conocer mas</a></div>');
-  h.push('</section>');
-  h.push('<div class="stack"><span class="stag">Rama: ' + br + '</span><span class="stag">' + fwLabel + '</span><span class="stag">SSL activo</span><span class="stag">CDN global</span></div>');
-  h.push('<section class="features" id="features"><h2>Caracteristicas</h2><div class="grid">');
-  h.push('<div class="card"><div class="card-icon">⚡</div><h3>Velocidad</h3><p>CDN global en LATAM, US y EU para minima latencia.</p></div>');
-  h.push('<div class="card"><div class="card-icon">🔒</div><h3>SSL</h3><p>Certificados gestionados automaticamente.</p></div>');
-  h.push('<div class="card"><div class="card-icon">🔄</div><h3>CI/CD</h3><p>Cada push a ' + br + ' despliega automaticamente.</p></div>');
-  h.push('<div class="card"><div class="card-icon">🌐</div><h3>Dominios</h3><p>Conecta tu dominio personalizado en segundos.</p></div>');
-  h.push('<div class="card"><div class="card-icon">📊</div><h3>Analiticas</h3><p>Metricas en tiempo real desde el dashboard.</p></div>');
-  h.push('<div class="card"><div class="card-icon">🛡</div><h3>DDoS</h3><p>Proteccion automatica para maximo uptime.</p></div>');
-  h.push('</div></section>');
-  h.push('<footer>' + nm + ' &mdash; ' + (site.domain||'') + '<br><div class="dbadge">Desplegado con DeployOS</div></footer>');
-  h.push('</body></html>');
+
+  // Topbar
+  h.push('<div class="topbar"><div class="logo"><div class="logo-icon">' + icon + '</div>' + nm + '</div>');
+  h.push('<div style="margin-left:auto;display:flex;gap:8px;"><span class="badge badge-green">● Live</span><span class="badge badge-fw">' + fwLabel + '</span></div></div>');
+
+  // Repo header
+  h.push('<div class="repo-header">');
+  h.push('<div class="repo-path"><span class="owner">' + (rp.split('/')[0]||nm) + '</span><span class="slash">/</span><span class="reponame">' + (rp.split('/')[1]||nm) + '</span></div>');
+  h.push('<div class="repo-desc">' + desc + '</div>');
+  h.push('<div class="repo-meta">');
+  if(lang) h.push('<span class="meta-item"><span class="lang-dot"></span>' + lang + '</span>');
+  if(stars) h.push('<span class="meta-item">★ ' + stars + '</span>');
+  h.push('<span class="meta-item">🌿 ' + br + '</span>');
+  h.push('</div></div>');
+
+  // Tabs
+  h.push('<div class="tab-bar"><span class="tab active">📄 Código</span><span class="tab">🔀 Commits</span><span class="tab">⚙ Ajustes</span></div>');
+
+  // Content grid
+  h.push('<div class="content">');
+
+  // File list
+  var files = {
+    nextjs: [['app/','','hace 2 días'],['public/','','hace 5 días'],['package.json','Initial commit','hace 2 días'],['next.config.js','Config update','hace 3 días'],['README.md','Add docs','hace 1 semana']],
+    react:  [['src/','','hace 2 días'],['public/','','hace 5 días'],['package.json','Initial commit','hace 2 días'],['vite.config.js','Config update','hace 3 días'],['README.md','Add docs','hace 1 semana']],
+    vue:    [['src/','','hace 2 días'],['public/','','hace 5 días'],['package.json','Initial commit','hace 2 días'],['vue.config.js','Config update','hace 3 días'],['README.md','Add docs','hace 1 semana']],
+    static: [['index.html','Initial commit','hace 2 días'],['styles.css','Style update','hace 3 días'],['script.js','Add interactions','hace 4 días'],['assets/','','hace 5 días'],['README.md','Add docs','hace 1 semana']],
+    other:  [['src/','','hace 2 días'],['package.json','Initial commit','hace 2 días'],['index.js','Main entry','hace 3 días'],['Dockerfile','Add docker','hace 4 días'],['README.md','Add docs','hace 1 semana']]
+  };
+  var fileList = files[fw] || files['static'];
+  h.push('<div class="file-box"><div class="file-header"><div class="commit-info">');
+  h.push('<img src="https://github.com/' + (rp.split('/')[0]||'ghost') + '.png?size=20" style="width:20px;height:20px;border-radius:50%;background:#30363d;" onerror="this.style.display='none'">');
+  h.push('<span style="color:#e6edf3">' + (rp.split('/')[0]||nm) + '</span>');
+  h.push('<span style="color:#8b949e">último commit</span>');
+  h.push('<span class="commit-hash">' + commit + '</span></div>');
+  h.push('<span style="color:#6e7681;font-size:12px;">hace un momento</span></div>');
+  h.push('<div class="file-list">');
+  fileList.forEach(function(f){ h.push('<div class="file-row"><span>' + (f[0].endsWith('/')?'📁':'📄') + '</span><span class="fname">' + f[0] + '</span><span class="fmsg">' + f[1] + '</span><span class="fdate">' + f[2] + '</span></div>'); });
+  h.push('</div></div>');
+
+  // Sidebar
+  h.push('<div class="sidebar">');
+  h.push('<div class="side-box"><h3>🚀 Deploy</h3>');
+  h.push('<div class="deploy-status"><div class="status-dot"></div><span style="color:#3fb950">Activo</span></div>');
+  h.push('<div class="deploy-url">' + domain + '</div>');
+  h.push('<div style="margin-top:8px;font-size:12px;color:#6e7681">Rama: ' + br + ' · ' + fwLabel + '</div></div>');
+  if(desc && desc !== 'Repositorio desplegado en DeployOS') {
+    h.push('<div class="side-box"><h3>ℹ Sobre este proyecto</h3><p>' + desc + '</p></div>');
+  }
+  h.push('<div class="side-box"><h3>🔧 Stack</h3>');
+  h.push('<div style="margin-top:4px">');
+  if(lang) h.push('<span class="topic">' + lang + '</span>');
+  h.push('<span class="topic">' + fwLabel + '</span><span class="topic">SSL</span><span class="topic">CI/CD</span></div></div>');
+  h.push('</div></div></body></html>');
   return h.join('\n');
+}
+
+function getSitePreviewUrl(site) {
+  var repo = site.repo || '';
+  var parts = repo.split('/');
+  if (parts.length === 2) {
+    return 'https://' + parts[0] + '.github.io/' + parts[1] + '/';
+  }
+  return null;
 }
 
 function loadPreview() {
   var iframe = document.getElementById('preview-iframe');
   var placeholder = document.getElementById('preview-placeholder');
+  var urlText = document.getElementById('preview-url-text');
   if (!currentSite) return;
-  var html = buildPreviewHTML(currentSite);
-  iframe.removeAttribute('sandbox');
-  iframe.removeAttribute('src');
-  iframe.srcdoc = html;
-  iframe.style.display = 'block';
-  placeholder.style.display = 'none';
+  var previewUrl = getSitePreviewUrl(currentSite);
+  if (previewUrl) {
+    iframe.removeAttribute('srcdoc');
+    iframe.setAttribute('sandbox', 'allow-scripts allow-forms allow-popups allow-same-origin');
+    iframe.src = previewUrl;
+    iframe.style.display = 'block';
+    placeholder.style.display = 'none';
+    if (urlText) urlText.textContent = previewUrl;
+  } else {
+    iframe.style.display = 'none';
+    placeholder.style.display = 'flex';
+  }
 }
 
 
 function openSiteInNewTab() {
   if (!currentSite) return;
-  var html = buildPreviewHTML(currentSite);
-  var newTab = window.open('', '_blank');
-  if (newTab) {
-    newTab.document.open();
-    newTab.document.write(html);
-    newTab.document.close();
+  var url = getSitePreviewUrl(currentSite);
+  if (url) {
+    window.open(url, '_blank');
+  } else {
+    alert('No hay URL disponible para este sitio.');
   }
 }
 
