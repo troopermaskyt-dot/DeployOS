@@ -117,56 +117,39 @@ function showError(id, msg) {
   el.textContent = msg; el.style.display = 'block';
 }
 
-// ── GitHub OAuth ───────────────────────────
+// ── GitHub PAT ─────────────────────────────
 async function connectGitHub() {
+  const token = document.getElementById('gh-pat-input').value.trim();
   const btn = document.getElementById('btn-connect-github');
-  btn.textContent = '⏳ Conectando...';
+  const err = document.getElementById('gh-pat-error');
+  err.style.display = 'none';
+  if (!token) { err.textContent = 'Pega tu Personal Access Token'; err.style.display = 'block'; return; }
+  btn.textContent = '⏳ Verificando...';
   btn.disabled = true;
-
-  // Si hay Client ID real configurado, redirigir al flujo real
-  if (GITHUB_CLIENT_ID !== "TU_GITHUB_CLIENT_ID") {
-    const redirect = encodeURIComponent(window.location.href.split('?')[0]);
-    window.location.href = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&scope=repo&redirect_uri=${redirect}`;
-    return;
-  }
-
-  // Modo demo: pedir username de GitHub y cargar repos públicos reales
-  const username = prompt('Introduce tu usuario de GitHub para cargar tus repos públicos (demo):');
-  if (!username) { btn.textContent = 'Conectar GitHub'; btn.disabled = false; return; }
-
-  btn.textContent = '⏳ Cargando repos...';
   try {
-    const resp = await fetch(`https://api.github.com/users/${username}/repos?sort=updated&per_page=30`);
-    if (!resp.ok) throw new Error('Usuario no encontrado');
-    const repos = await resp.json();
-    // Obtener info del usuario
-    const userResp = await fetch(`https://api.github.com/users/${username}`);
+    const userResp = await fetch('https://api.github.com/user', { headers: { 'Authorization': 'token ' + token } });
+    if (!userResp.ok) throw new Error('Token inválido o sin permisos');
     const userData = await userResp.json();
-
+    const reposResp = await fetch('https://api.github.com/user/repos?sort=updated&per_page=50&affiliation=owner', { headers: { 'Authorization': 'token ' + token } });
+    const repos = await reposResp.json();
     githubUser = { login: userData.login, name: userData.name || userData.login, avatar: userData.avatar_url };
-    githubToken = 'demo_public';
+    githubToken = token;
     githubRepos = repos.map(r => ({
-      id: r.id,
-      name: r.name,
-      full_name: r.full_name,
-      description: r.description,
-      language: r.language,
-      updated_at: r.updated_at,
-      private: r.private,
-      default_branch: r.default_branch || 'main',
-      html_url: r.html_url
+      id: r.id, name: r.name, full_name: r.full_name,
+      description: r.description, language: r.language,
+      updated_at: r.updated_at, private: r.private,
+      default_branch: r.default_branch || 'main', html_url: r.html_url
     }));
-
     sessionStorage.setItem('gh_token', githubToken);
     sessionStorage.setItem('gh_user', JSON.stringify(githubUser));
     sessionStorage.setItem('gh_repos', JSON.stringify(githubRepos));
-
     updateGitHubUI();
     closeModal('modal-github-connect');
-    openNewSite(); // abrir directamente el modal de nuevo sitio
+    openNewSite();
   } catch (e) {
-    alert('Error: ' + e.message + '\nVerifica el username de GitHub.');
-    btn.textContent = 'Conectar GitHub';
+    err.textContent = e.message;
+    err.style.display = 'block';
+    btn.textContent = 'Conectar';
     btn.disabled = false;
   }
 }
