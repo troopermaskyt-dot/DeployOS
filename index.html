@@ -340,10 +340,10 @@
             <div class="dash-title" id="proj-title">Sitio</div>
             <span class="badge badge-green" id="proj-status-badge">● Activo</span>
           </div>
-          <a class="project-domain-link" id="proj-domain-link" href="#" target="_blank">—</a>
+          <a class="project-domain-link" id="proj-domain-link" href="#" target="_blank" onclick="event.preventDefault();openSiteInNewTab()">—</a>
         </div>
         <button class="btn-sm btn-ghost" onclick="redeployCurrent()">🔄 Redesplegar</button>
-        <button class="btn-sm btn-purple" onclick="window.open('https://'+(currentSite&&currentSite.domain||''),'_blank')">🔗 Ver sitio</button>
+        <button class="btn-sm btn-purple" onclick="openSiteInNewTab()">🔗 Ver sitio</button>
       </div>
 
       <div class="project-tabs">

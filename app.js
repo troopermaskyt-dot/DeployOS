@@ -531,9 +531,8 @@ function renderMiniPreview(i, site, color) {
   </div>
   <footer>Powered by DeployOS</footer>
   </body></html>`;
-  const iframe = document.createElement('iframe');
+  var iframe = document.createElement('iframe');
   iframe.srcdoc = html;
-  iframe.setAttribute('sandbox', 'allow-scripts');
   iframe.style.cssText = 'width:200%;height:200%;transform:scale(0.5);transform-origin:top left;border:none;pointer-events:none;';
   container.appendChild(iframe);
 }
@@ -571,116 +570,100 @@ function switchProjectTab(name, btn) {
 }
 
 // ── Preview funcional ──────────────────────
+var _previewBlobUrl = null;
+
+function buildPreviewHTML(site) {
+  var fwMap = { nextjs:'Next.js', react:'React', vue:'Vue', svelte:'Svelte', static:'HTML/CSS', other:'Node.js' };
+  var bgMap = { nextjs:'#000000', react:'#1e1e2e', vue:'#1a1a2a', svelte:'#1a0a0a', static:'#0f0f1a', other:'#0a0a0f' };
+  var acMap = { nextjs:'#ffffff', react:'#61dafb', vue:'#42b883', svelte:'#ff3e00', static:'#7c3aed', other:'#10b981' };
+  var fw = site.framework || 'static';
+  var bg = bgMap[fw] || '#0f0f1a';
+  var ac = acMap[fw] || '#7c3aed';
+  var nm = (site.name || 'Mi Sitio').replace(/</g,'&lt;');
+  var rp = (site.repo || site.name || nm).replace(/</g,'&lt;');
+  var br = site.repoBranch || 'main';
+  var fwLabel = fwMap[fw] || fw;
+  var title = nm.replace(/-/g,' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+  var txtColor = (fw === 'react' || fw === 'nextjs') ? '#000' : '#fff';
+
+  var h = [];
+  h.push('<!DOCTYPE html><html lang="es"><head>');
+  h.push('<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">');
+  h.push('<title>' + nm + '</title>');
+  h.push('<style>');
+  h.push('*{margin:0;padding:0;box-sizing:border-box;}');
+  h.push('body{font-family:system-ui,sans-serif;background:' + bg + ';color:#f0f0ff;min-height:100vh;}');
+  h.push('nav{position:sticky;top:0;background:' + bg + 'ee;border-bottom:1px solid ' + ac + '44;padding:.75rem 2rem;display:flex;align-items:center;justify-content:space-between;}');
+  h.push('.brand{font-weight:700;font-size:1.1rem;color:' + ac + ';display:flex;align-items:center;gap:.5rem;}');
+  h.push('.dot{width:10px;height:10px;border-radius:50%;background:' + ac + ';}');
+  h.push('.nav-links{display:flex;gap:1.5rem;list-style:none;}');
+  h.push('.nav-links a{color:#a0a0c0;text-decoration:none;font-size:.875rem;}');
+  h.push('.hero{padding:5rem 2rem 4rem;text-align:center;background:radial-gradient(ellipse 80% 60% at 50% 0%,' + ac + '22,transparent);}');
+  h.push('.tag{display:inline-block;padding:.25rem .75rem;background:' + ac + '22;border:1px solid ' + ac + '44;border-radius:20px;font-size:.75rem;color:' + ac + ';margin-bottom:1.5rem;}');
+  h.push('h1{font-size:clamp(2rem,5vw,3.5rem);font-weight:800;line-height:1.1;margin-bottom:1rem;background:linear-gradient(135deg,#fff,' + ac + ');-webkit-background-clip:text;-webkit-text-fill-color:transparent;}');
+  h.push('.hero p{color:#a0a0c0;font-size:1rem;max-width:540px;margin:0 auto 2rem;line-height:1.6;}');
+  h.push('.btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;}');
+  h.push('.btn{display:inline-flex;align-items:center;padding:.65rem 1.5rem;border-radius:8px;font-weight:600;font-size:.875rem;text-decoration:none;transition:opacity .2s;}');
+  h.push('.btn1{background:' + ac + ';color:' + txtColor + ';}');
+  h.push('.btn2{background:transparent;border:1px solid ' + ac + '55;color:' + ac + ';}');
+  h.push('.stack{padding:1.5rem 2rem;display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;border-top:1px solid ' + ac + '15;border-bottom:1px solid ' + ac + '15;}');
+  h.push('.stag{padding:.3rem .85rem;background:' + bg + ';border:1px solid ' + ac + '33;border-radius:20px;font-size:.8rem;color:' + ac + ';}');
+  h.push('.features{padding:3rem 2rem;}');
+  h.push('.features h2{text-align:center;font-size:1.5rem;font-weight:700;margin-bottom:2rem;}');
+  h.push('.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;max-width:900px;margin:0 auto;}');
+  h.push('.card{background:' + bg + 'cc;border:1px solid ' + ac + '22;border-radius:12px;padding:1.5rem;transition:border-color .2s;}');
+  h.push('.card:hover{border-color:' + ac + '66;}');
+  h.push('.card-icon{font-size:1.75rem;margin-bottom:.75rem;}');
+  h.push('.card h3{font-size:1rem;font-weight:600;margin-bottom:.4rem;color:' + ac + ';}');
+  h.push('.card p{font-size:.8rem;color:#707090;line-height:1.5;}');
+  h.push('footer{padding:1.5rem 2rem;text-align:center;color:#404060;font-size:.75rem;border-top:1px solid ' + ac + '15;}');
+  h.push('.dbadge{display:inline-flex;align-items:center;gap:.4rem;padding:.25rem .65rem;background:' + bg + ';border:1px solid ' + ac + '33;border-radius:6px;font-size:.7rem;color:' + ac + ';margin-top:.5rem;}');
+  h.push('</style></head><body>');
+  h.push('<nav><div class="brand"><div class="dot"></div>' + nm + '</div>');
+  h.push('<ul class="nav-links"><li><a href="#">Inicio</a></li><li><a href="#">Proyectos</a></li><li><a href="#">Sobre mi</a></li><li><a href="#">Contacto</a></li></ul></nav>');
+  h.push('<section class="hero">');
+  h.push('<div class="tag">Desplegado con DeployOS</div>');
+  h.push('<h1>' + title + '</h1>');
+  h.push('<p>Proyecto construido con ' + fwLabel + ' desde el repositorio <strong>' + rp + '</strong>.</p>');
+  h.push('<div class="btns"><a href="https://github.com/' + rp + '" class="btn btn1" target="_blank">Ver en GitHub</a><a href="#features" class="btn btn2">Conocer mas</a></div>');
+  h.push('</section>');
+  h.push('<div class="stack"><span class="stag">Rama: ' + br + '</span><span class="stag">' + fwLabel + '</span><span class="stag">SSL activo</span><span class="stag">CDN global</span></div>');
+  h.push('<section class="features" id="features"><h2>Caracteristicas</h2><div class="grid">');
+  h.push('<div class="card"><div class="card-icon">⚡</div><h3>Velocidad</h3><p>CDN global en LATAM, US y EU para minima latencia.</p></div>');
+  h.push('<div class="card"><div class="card-icon">🔒</div><h3>SSL</h3><p>Certificados gestionados automaticamente.</p></div>');
+  h.push('<div class="card"><div class="card-icon">🔄</div><h3>CI/CD</h3><p>Cada push a ' + br + ' despliega automaticamente.</p></div>');
+  h.push('<div class="card"><div class="card-icon">🌐</div><h3>Dominios</h3><p>Conecta tu dominio personalizado en segundos.</p></div>');
+  h.push('<div class="card"><div class="card-icon">📊</div><h3>Analiticas</h3><p>Metricas en tiempo real desde el dashboard.</p></div>');
+  h.push('<div class="card"><div class="card-icon">🛡</div><h3>DDoS</h3><p>Proteccion automatica para maximo uptime.</p></div>');
+  h.push('</div></section>');
+  h.push('<footer>' + nm + ' &mdash; ' + (site.domain||'') + '<br><div class="dbadge">Desplegado con DeployOS</div></footer>');
+  h.push('</body></html>');
+  return h.join('\n');
+}
+
 function loadPreview() {
-  const iframe = document.getElementById('preview-iframe');
-  const placeholder = document.getElementById('preview-placeholder');
-  const site = currentSite;
-  if (!site) return;
-
-  const colors = { nextjs:'#000000', react:'#1e1e2e', vue:'#1a1a2a', svelte:'#1a0a0a', static:'#0f0f1a', other:'#0a0a0f' };
-  const accents = { nextjs:'#ffffff', react:'#61dafb', vue:'#42b883', svelte:'#ff3e00', static:'#7c3aed', other:'#10b981' };
-  const fw = site.framework || 'static';
-  const bg = colors[fw] || '#0f0f1a';
-  const accent = accents[fw] || '#7c3aed';
-  const name = site.name;
-  const domain = site.domain;
-  const repo = site.repo || name;
-  const branch = site.repoBranch || 'main';
-
-  const html = `<!DOCTYPE html><html><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${name}</title>
-<style>
-  *{margin:0;padding:0;box-sizing:border-box;}
-  :root{--accent:${accent};--bg:${bg};--bg2:${bg}cc;}
-  body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:#f0f0ff;min-height:100vh;}
-  nav{position:sticky;top:0;z-index:99;background:${bg}ee;backdrop-filter:blur(12px);border-bottom:1px solid ${accent}33;padding:.75rem 2rem;display:flex;align-items:center;justify-content:space-between;}
-  .brand{display:flex;align-items:center;gap:.5rem;font-weight:700;font-size:1.1rem;color:var(--accent);}
-  .brand-dot{width:10px;height:10px;border-radius:50%;background:var(--accent);}
-  .nav-links{display:flex;gap:1.5rem;list-style:none;}
-  .nav-links a{color:#a0a0c0;text-decoration:none;font-size:.875rem;transition:color .2s;}
-  .nav-links a:hover{color:var(--accent);}
-  .hero{padding:5rem 2rem 4rem;text-align:center;background:radial-gradient(ellipse 80% 60% at 50% 0%,${accent}22,transparent);}
-  .hero-tag{display:inline-block;padding:.25rem .75rem;background:${accent}22;border:1px solid ${accent}44;border-radius:20px;font-size:.75rem;color:var(--accent);margin-bottom:1.5rem;letter-spacing:.05em;}
-  h1{font-size:clamp(2rem,5vw,3.5rem);font-weight:800;line-height:1.1;margin-bottom:1rem;background:linear-gradient(135deg,#fff 0%,${accent} 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-  .hero p{color:#a0a0c0;font-size:1rem;max-width:540px;margin:0 auto 2rem;line-height:1.6;}
-  .hero-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;}
-  .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.65rem 1.5rem;border-radius:8px;font-weight:600;font-size:.875rem;cursor:pointer;text-decoration:none;transition:all .2s;}
-  .btn-primary{background:var(--accent);color:${fw==='react'||fw==='nextjs'?'#000':'#fff'};}
-  .btn-primary:hover{opacity:.85;transform:translateY(-1px);}
-  .btn-ghost{background:transparent;border:1px solid ${accent}55;color:var(--accent);}
-  .btn-ghost:hover{border-color:var(--accent);background:${accent}11;}
-  .features{padding:3rem 2rem;background:${bg};}
-  .features-title{text-align:center;font-size:1.5rem;font-weight:700;margin-bottom:.5rem;}
-  .features-sub{text-align:center;color:#808090;font-size:.875rem;margin-bottom:2.5rem;}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;max-width:900px;margin:0 auto;}
-  .card{background:${bg}cc;border:1px solid ${accent}22;border-radius:12px;padding:1.5rem;transition:border-color .2s,transform .2s;}
-  .card:hover{border-color:${accent}66;transform:translateY(-3px);}
-  .card-icon{font-size:1.75rem;margin-bottom:.75rem;}
-  .card h3{font-size:1rem;font-weight:600;margin-bottom:.4rem;color:var(--accent);}
-  .card p{font-size:.8rem;color:#707090;line-height:1.5;}
-  .stack{padding:2rem;background:${accent}08;border-top:1px solid ${accent}15;border-bottom:1px solid ${accent}15;}
-  .stack-inner{max-width:700px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
-  .stack-tag{display:flex;align-items:center;gap:.4rem;padding:.35rem .85rem;background:${bg};border:1px solid ${accent}33;border-radius:20px;font-size:.8rem;color:var(--accent);}
-  footer{padding:1.5rem 2rem;text-align:center;color:#404060;font-size:.75rem;border-top:1px solid ${accent}15;}
-  footer a{color:${accent};text-decoration:none;}
-  footer a:hover{text-decoration:underline;}
-  .deployos-badge{display:inline-flex;align-items:center;gap:.4rem;padding:.25rem .65rem;background:${bg};border:1px solid ${accent}33;border-radius:6px;font-size:.7rem;color:var(--accent);margin-top:.5rem;}
-</style>
-</head><body>
-<nav>
-  <div class="brand"><div class="brand-dot"></div>${name}</div>
-  <ul class="nav-links">
-    <li><a href="#">Inicio</a></li>
-    <li><a href="#">Proyectos</a></li>
-    <li><a href="#">Sobre mí</a></li>
-    <li><a href="#">Contacto</a></li>
-  </ul>
-</nav>
-<section class="hero">
-  <div class="hero-tag">✨ Desplegado con DeployOS</div>
-  <h1>${name.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase())}</h1>
-  <p>Bienvenido a mi proyecto. Construido con ${fwNames[fw]||'tecnología moderna'} y desplegado automáticamente desde <code style="color:${accent};background:${accent}18;padding:0 4px;border-radius:3px;">${repo}</code>.</p>
-  <div class="hero-btns">
-    <a href="https://github.com/${repo}" target="_blank" class="btn btn-primary">Ver en GitHub</a>
-    <a href="#features" class="btn btn-ghost">Conocer más</a>
-  </div>
-</section>
-<div class="stack">
-  <div class="stack-inner">
-    <span class="stack-tag">⎇ ${branch}</span>
-    <span class="stack-tag">📦 ${fwNames[fw]||fw}</span>
-    <span class="stack-tag">🔒 SSL activo</span>
-    <span class="stack-tag">🌍 CDN global</span>
-    <span class="stack-tag">⚡ Optimizado</span>
-  </div>
-</div>
-<section class="features" id="features">
-  <div class="features-title">Características</div>
-  <div class="features-sub">Todo lo que necesitas para tu proyecto</div>
-  <div class="grid">
-    <div class="card"><div class="card-icon">⚡</div><h3>Velocidad máxima</h3><p>CDN global con edge nodes en LATAM, US y EU para la mínima latencia.</p></div>
-    <div class="card"><div class="card-icon">🔒</div><h3>SSL automático</h3><p>Certificados SSL/TLS gestionados automáticamente. Siempre seguro.</p></div>
-    <div class="card"><div class="card-icon">🔄</div><h3>Deploy continuo</h3><p>Cada push a ${branch} despliega automáticamente. Sin pasos manuales.</p></div>
-    <div class="card"><div class="card-icon">🌐</div><h3>Dominios custom</h3><p>Conecta tu dominio personalizado en segundos con DNS automático.</p></div>
-    <div class="card"><div class="card-icon">📊</div><h3>Analíticas</h3><p>Visitas, page views y métricas en tiempo real desde el dashboard.</p></div>
-    <div class="card"><div class="card-icon">🛡</div><h3>DDoS protection</h3><p>Protección automática contra ataques para que tu sitio siempre esté disponible.</p></div>
-  </div>
-</section>
-<footer>
-  <div>© ${new Date().getFullYear()} ${name} · <a href="https://github.com/${repo}" target="_blank">github.com/${repo}</a></div>
-  <div class="deployos-badge">🚀 Desplegado con <strong>DeployOS</strong></div>
-</footer>
-</body></html>`;
-
-  const fwNames2 = { nextjs:'Next.js', react:'React', vue:'Vue', svelte:'Svelte', static:'HTML/CSS estático', other:'Node.js' };
+  var iframe = document.getElementById('preview-iframe');
+  var placeholder = document.getElementById('preview-placeholder');
+  if (!currentSite) return;
+  var html = buildPreviewHTML(currentSite);
+  iframe.removeAttribute('sandbox');
+  iframe.removeAttribute('src');
   iframe.srcdoc = html;
   iframe.style.display = 'block';
   placeholder.style.display = 'none';
 }
 
-// Re-usar el objeto fwNames en contexto global
-const fwNames = { nextjs:'Next.js', react:'React', vue:'Vue', svelte:'Svelte', static:'HTML/CSS estático', other:'Node.js' };
+
+function openSiteInNewTab() {
+  if (!currentSite) return;
+  var html = buildPreviewHTML(currentSite);
+  var newTab = window.open('', '_blank');
+  if (newTab) {
+    newTab.document.open();
+    newTab.document.write(html);
+    newTab.document.close();
+  }
+}
 
 function setPreviewSize(width, height, btn) {
   document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
@@ -804,9 +787,15 @@ function redeployCurrent() {
 }
 
 function deleteCurrentSite() {
-  if (!currentSite || !confirm('¿Eliminar "' + currentSite.name + '" permanentemente?')) return;
-  sites = sites.filter(s => s !== currentSite);
-  saveSites(); renderSites(); goToDashboard();
+  if (!currentSite) { alert('No hay sitio seleccionado'); return; }
+  var name = currentSite.name;
+  var ok = window.confirm('Eliminar "' + name + '" permanentemente? Esta accion no se puede deshacer.');
+  if (!ok) return;
+  sites = sites.filter(function(s){ return s !== currentSite; });
+  currentSite = null;
+  saveSites();
+  renderSites();
+  goToDashboard();
 }
 
 // ── Upgrade ────────────────────────────────
