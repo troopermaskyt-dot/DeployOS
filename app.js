@@ -538,13 +538,7 @@ function renderMiniPreview(i, site, color) {
   <footer>Powered by DeployOS</footer>
   </body></html>`;
   var iframe = document.createElement('iframe');
-  var miniUrl = 'https://' + site.name.toLowerCase().replace(/[^a-z0-9-]/g,'') + '.github.io/' + (site.repo||'').split('/')[1] + '/';
-  var repoParts = (site.repo||'').split('/');
-  if (repoParts.length === 2) {
-    miniUrl = 'https://' + repoParts[0] + '.github.io/' + repoParts[1] + '/';
-  }
-  iframe.src = miniUrl;
-  iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+  iframe.srcdoc = html;
   iframe.style.cssText = 'width:200%;height:200%;transform:scale(0.5);transform-origin:top left;border:none;pointer-events:none;';
   container.appendChild(iframe);
 }
@@ -723,29 +717,21 @@ function loadPreview() {
   var placeholder = document.getElementById('preview-placeholder');
   var urlText = document.getElementById('preview-url-text');
   if (!currentSite) return;
-  var previewUrl = getSitePreviewUrl(currentSite);
-  if (previewUrl) {
-    iframe.removeAttribute('srcdoc');
-    iframe.setAttribute('sandbox', 'allow-scripts allow-forms allow-popups allow-same-origin');
-    iframe.src = previewUrl;
-    iframe.style.display = 'block';
-    placeholder.style.display = 'none';
-    if (urlText) urlText.textContent = previewUrl;
-  } else {
-    iframe.style.display = 'none';
-    placeholder.style.display = 'flex';
-  }
+  var html = buildPreviewHTML(currentSite);
+  iframe.removeAttribute('src');
+  iframe.removeAttribute('sandbox');
+  iframe.srcdoc = html;
+  iframe.style.display = 'block';
+  placeholder.style.display = 'none';
+  if (urlText) urlText.textContent = 'https://' + (currentSite.domain || currentSite.name + '.deployos.app');
 }
 
 
 function openSiteInNewTab() {
   if (!currentSite) return;
-  var url = getSitePreviewUrl(currentSite);
-  if (url) {
-    window.open(url, '_blank');
-  } else {
-    alert('No hay URL disponible para este sitio.');
-  }
+  var html = buildPreviewHTML(currentSite);
+  var tab = window.open('', '_blank');
+  if (tab) { tab.document.open(); tab.document.write(html); tab.document.close(); }
 }
 
 function setPreviewSize(width, height, btn) {
@@ -764,10 +750,7 @@ function setPreviewSize(width, height, btn) {
 }
 
 function refreshPreview() {
-  const iframe = document.getElementById('preview-iframe');
-  const tmp = iframe.srcdoc;
-  iframe.srcdoc = '';
-  setTimeout(() => { iframe.srcdoc = tmp; }, 80);
+  loadPreview();
 }
 
 // ── Deployments ────────────────────────────
