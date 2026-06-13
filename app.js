@@ -608,64 +608,64 @@ function buildPreviewHTML(site) {
   h.push('*{margin:0;padding:0;box-sizing:border-box;}');
   h.push('body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:#0d1117;color:#e6edf3;min-height:100vh;}');
   h.push('a{color:inherit;text-decoration:none;}');
-  h.push('.topbar{background:#161b22;border-bottom:1px solid #30363d;padding:12px 24px;display:flex;align-items:center;gap:12px;}');
-  h.push('.logo{font-size:20px;color:#f0f6fc;font-weight:700;display:flex;align-items:center;gap:8px;}');
-  h.push('.logo-icon{width:28px;height:28px;background:' + ac + ';border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#000;font-weight:900;}');
-  h.push('.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500;border:1px solid;}');
-  h.push('.badge-green{background:#1f3a1f;border-color:#2ea04380;color:#3fb950;}');
-  h.push('.badge-fw{background:#' + ac.replace('#','') + '15;border-color:' + ac + '40;color:' + ac + ';}');
-  h.push('.repo-header{padding:28px 24px 0;max-width:980px;margin:0 auto;}');
-  h.push('.repo-path{font-size:18px;color:#e6edf3;margin-bottom:8px;}');
-  h.push('.repo-path .owner{color:#58a6ff;font-weight:400;}');
-  h.push('.repo-path .slash{color:#8b949e;margin:0 2px;}');
-  h.push('.repo-path .reponame{font-weight:600;}');
-  h.push('.repo-desc{color:#8b949e;font-size:14px;margin:8px 0 16px;}');
-  h.push('.repo-meta{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px;}');
-  h.push('.meta-item{display:flex;align-items:center;gap:5px;font-size:13px;color:#8b949e;}');
-  h.push('.lang-dot{width:10px;height:10px;border-radius:50%;background:' + lc + ';}');
-  h.push('.tab-bar{border-bottom:1px solid #30363d;display:flex;gap:0;padding:0 24px;max-width:980px;margin:0 auto;}');
-  h.push('.tab{padding:10px 16px;font-size:14px;color:#8b949e;border-bottom:2px solid transparent;cursor:pointer;}');
-  h.push('.tab.active{color:#e6edf3;border-bottom-color:' + ac + ';}');
-  h.push('.content{max-width:980px;margin:0 auto;padding:24px;display:grid;grid-template-columns:1fr 280px;gap:24px;}');
-  h.push('.file-box{background:#161b22;border:1px solid #30363d;border-radius:6px;overflow:hidden;}');
-  h.push('.file-header{background:#161b22;border-bottom:1px solid #30363d;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;}');
-  h.push('.commit-info{display:flex;align-items:center;gap:8px;font-size:13px;}');
-  h.push('.commit-hash{font-family:monospace;color:#58a6ff;font-size:12px;background:#1f2937;padding:2px 6px;border-radius:4px;}');
-  h.push('.file-list{font-size:13px;}');
-  h.push('.file-row{display:flex;align-items:center;gap:10px;padding:8px 16px;border-bottom:1px solid #21262d;color:#8b949e;}');
-  h.push('.file-row:last-child{border-bottom:none;}');
-  h.push('.file-row .fname{color:#58a6ff;flex:1;}');
-  h.push('.file-row .fmsg{flex:2;color:#8b949e;}');
-  h.push('.file-row .fdate{color:#6e7681;font-size:12px;}');
-  h.push('.sidebar{display:flex;flex-direction:column;gap:16px;}');
-  h.push('.side-box{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:16px;}');
-  h.push('.side-box h3{font-size:14px;font-weight:600;margin-bottom:10px;color:#e6edf3;}');
-  h.push('.side-box p{font-size:13px;color:#8b949e;line-height:1.5;}');
-  h.push('.deploy-status{display:flex;align-items:center;gap:8px;font-size:13px;padding:8px 0;}');
-  h.push('.status-dot{width:8px;height:8px;border-radius:50%;background:#3fb950;}');
-  h.push('.deploy-url{color:#58a6ff;font-size:13px;word-break:break-all;}');
-  h.push('.topic{display:inline-block;background:#1f3a5f;color:#58a6ff;border-radius:20px;padding:3px 10px;font-size:12px;margin:2px;}');
+  h.push('.pv-topbar{background:#161b22;border-bottom:1px solid #30363d;padding:12px 24px;display:flex;align-items:center;gap:12px;}');
+  h.push('.pv-logo{font-size:20px;color:#f0f6fc;font-weight:700;display:flex;align-items:center;gap:8px;}');
+  h.push('.pv-logo-icon{width:28px;height:28px;background:' + ac + ';border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#000;font-weight:900;}');
+  h.push('.pv-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500;border:1px solid;}');
+  h.push('.pv-badge-green{background:#1f3a1f;border-color:#2ea04380;color:#3fb950;}');
+  h.push('.pv-badge-fw{background:#' + ac.replace('#','') + '15;border-color:' + ac + '40;color:' + ac + ';}');
+  h.push('.pv-repo-header{padding:28px 24px 0;max-width:980px;margin:0 auto;}');
+  h.push('.pv-repo-path{font-size:18px;color:#e6edf3;margin-bottom:8px;}');
+  h.push('.pv-repo-path .pv-owner{color:#58a6ff;font-weight:400;}');
+  h.push('.pv-repo-path .pv-slash{color:#8b949e;margin:0 2px;}');
+  h.push('.pv-repo-path .pv-reponame{font-weight:600;}');
+  h.push('.pv-repo-desc{color:#8b949e;font-size:14px;margin:8px 0 16px;}');
+  h.push('.pv-repo-meta{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px;}');
+  h.push('.pv-meta-item{display:flex;align-items:center;gap:5px;font-size:13px;color:#8b949e;}');
+  h.push('.pv-lang-dot{width:10px;height:10px;border-radius:50%;background:' + lc + ';}');
+  h.push('.pv-tab-bar{border-bottom:1px solid #30363d;display:flex;gap:0;padding:0 24px;max-width:980px;margin:0 auto;}');
+  h.push('.pv-tab{padding:10px 16px;font-size:14px;color:#8b949e;border-bottom:2px solid transparent;cursor:pointer;}');
+  h.push('.pv-tab.active{color:#e6edf3;border-bottom-color:' + ac + ';}');
+  h.push('.pv-content{max-width:980px;margin:0 auto;padding:24px;display:grid;grid-template-columns:1fr 280px;gap:24px;}');
+  h.push('.pv-file-box{background:#161b22;border:1px solid #30363d;border-radius:6px;overflow:hidden;}');
+  h.push('.pv-file-header{background:#161b22;border-bottom:1px solid #30363d;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;}');
+  h.push('.pv-commit-info{display:flex;align-items:center;gap:8px;font-size:13px;}');
+  h.push('.pv-commit-hash{font-family:monospace;color:#58a6ff;font-size:12px;background:#1f2937;padding:2px 6px;border-radius:4px;}');
+  h.push('.pv-file-list{font-size:13px;}');
+  h.push('.pv-file-row{display:flex;align-items:center;gap:10px;padding:8px 16px;border-bottom:1px solid #21262d;color:#8b949e;}');
+  h.push('.pv-file-row:last-child{border-bottom:none;}');
+  h.push('.pv-file-row .pv-fname{color:#58a6ff;flex:1;}');
+  h.push('.pv-file-row .pv-fmsg{flex:2;color:#8b949e;}');
+  h.push('.pv-file-row .pv-fdate{color:#6e7681;font-size:12px;}');
+  h.push('.pv-sidebar{display:flex;flex-direction:column;gap:16px;}');
+  h.push('.pv-side-box{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:16px;}');
+  h.push('.pv-side-box h3{font-size:14px;font-weight:600;margin-bottom:10px;color:#e6edf3;}');
+  h.push('.pv-side-box p{font-size:13px;color:#8b949e;line-height:1.5;}');
+  h.push('.pv-deploy-status{display:flex;align-items:center;gap:8px;font-size:13px;padding:8px 0;}');
+  h.push('.pv-status-dot{width:8px;height:8px;border-radius:50%;background:#3fb950;}');
+  h.push('.pv-deploy-url{color:#58a6ff;font-size:13px;word-break:break-all;}');
+  h.push('.pv-topic{display:inline-block;background:#1f3a5f;color:#58a6ff;border-radius:20px;padding:3px 10px;font-size:12px;margin:2px;}');
   h.push('</style></head><body>');
 
   // Topbar
-  h.push('<div class="topbar"><div class="logo"><div class="logo-icon">' + icon + '</div>' + nm + '</div>');
-  h.push('<div style="margin-left:auto;display:flex;gap:8px;"><span class="badge badge-green">● Live</span><span class="badge badge-fw">' + fwLabel + '</span></div></div>');
+  h.push('<div class="pv-topbar"><div class="pv-logo"><div class="pv-logo-icon">' + icon + '</div>' + nm + '</div>');
+  h.push('<div style="margin-left:auto;display:flex;gap:8px;"><span class="pv-badge pv-badge-green">● Live</span><span class="pv-badge pv-badge-fw">' + fwLabel + '</span></div></div>');
 
   // Repo header
-  h.push('<div class="repo-header">');
-  h.push('<div class="repo-path"><span class="owner">' + (rp.split('/')[0]||nm) + '</span><span class="slash">/</span><span class="reponame">' + (rp.split('/')[1]||nm) + '</span></div>');
-  h.push('<div class="repo-desc">' + desc + '</div>');
-  h.push('<div class="repo-meta">');
-  if(lang) h.push('<span class="meta-item"><span class="lang-dot"></span>' + lang + '</span>');
-  if(stars) h.push('<span class="meta-item">★ ' + stars + '</span>');
-  h.push('<span class="meta-item">🌿 ' + br + '</span>');
+  h.push('<div class="pv-repo-header">');
+  h.push('<div class="pv-repo-path"><span class="pv-owner">' + (rp.split('/')[0]||nm) + '</span><span class="pv-slash">/</span><span class="pv-reponame">' + (rp.split('/')[1]||nm) + '</span></div>');
+  h.push('<div class="pv-repo-desc">' + desc + '</div>');
+  h.push('<div class="pv-repo-meta">');
+  if(lang) h.push('<span class="pv-meta-item"><span class="pv-lang-dot"></span>' + lang + '</span>');
+  if(stars) h.push('<span class="pv-meta-item">★ ' + stars + '</span>');
+  h.push('<span class="pv-meta-item">🌿 ' + br + '</span>');
   h.push('</div></div>');
 
   // Tabs
-  h.push('<div class="tab-bar"><span class="tab active">📄 Código</span><span class="tab">🔀 Commits</span><span class="tab">⚙ Ajustes</span></div>');
+  h.push('<div class="pv-tab-bar"><span class="pv-tab active">📄 Código</span><span class="pv-tab">🔀 Commits</span><span class="pv-tab">⚙ Ajustes</span></div>');
 
   // Content grid
-  h.push('<div class="content">');
+  h.push('<div class="pv-content">');
 
   // File list
   var files = {
@@ -676,29 +676,29 @@ function buildPreviewHTML(site) {
     other:  [['src/','','hace 2 días'],['package.json','Initial commit','hace 2 días'],['index.js','Main entry','hace 3 días'],['Dockerfile','Add docker','hace 4 días'],['README.md','Add docs','hace 1 semana']]
   };
   var fileList = files[fw] || files['static'];
-  h.push('<div class="file-box"><div class="file-header"><div class="commit-info">');
-  h.push('<img src="https://github.com/' + (rp.split('/')[0]||'ghost') + '.png?size=20" style="width:20px;height:20px;border-radius:50%;background:#30363d;" onerror="this.style.display='none'">');
+  h.push('<div class="pv-file-box"><div class="pv-file-header"><div class="pv-commit-info">');
+  h.push('<div style="width:20px;height:20px;border-radius:50%;background:#30363d;display:inline-block;"></div>');
   h.push('<span style="color:#e6edf3">' + (rp.split('/')[0]||nm) + '</span>');
   h.push('<span style="color:#8b949e">último commit</span>');
-  h.push('<span class="commit-hash">' + commit + '</span></div>');
+  h.push('<span class="pv-commit-hash">' + commit + '</span></div>');
   h.push('<span style="color:#6e7681;font-size:12px;">hace un momento</span></div>');
-  h.push('<div class="file-list">');
-  fileList.forEach(function(f){ h.push('<div class="file-row"><span>' + (f[0].endsWith('/')?'📁':'📄') + '</span><span class="fname">' + f[0] + '</span><span class="fmsg">' + f[1] + '</span><span class="fdate">' + f[2] + '</span></div>'); });
+  h.push('<div class="pv-file-list">');
+  fileList.forEach(function(f){ h.push('<div class="pv-file-row"><span>' + (f[0].endsWith('/')?'📁':'📄') + '</span><span class="pv-fname">' + f[0] + '</span><span class="pv-fmsg">' + f[1] + '</span><span class="pv-fdate">' + f[2] + '</span></div>'); });
   h.push('</div></div>');
 
   // Sidebar
-  h.push('<div class="sidebar">');
-  h.push('<div class="side-box"><h3>🚀 Deploy</h3>');
-  h.push('<div class="deploy-status"><div class="status-dot"></div><span style="color:#3fb950">Activo</span></div>');
-  h.push('<div class="deploy-url">' + domain + '</div>');
+  h.push('<div class="pv-sidebar">');
+  h.push('<div class="pv-side-box"><h3>🚀 Deploy</h3>');
+  h.push('<div class="pv-deploy-status"><div class="pv-status-dot"></div><span style="color:#3fb950">Activo</span></div>');
+  h.push('<div class="pv-deploy-url">' + domain + '</div>');
   h.push('<div style="margin-top:8px;font-size:12px;color:#6e7681">Rama: ' + br + ' · ' + fwLabel + '</div></div>');
   if(desc && desc !== 'Repositorio desplegado en DeployOS') {
-    h.push('<div class="side-box"><h3>ℹ Sobre este proyecto</h3><p>' + desc + '</p></div>');
+    h.push('<div class="pv-side-box"><h3>ℹ Sobre este proyecto</h3><p>' + desc + '</p></div>');
   }
-  h.push('<div class="side-box"><h3>🔧 Stack</h3>');
+  h.push('<div class="pv-side-box"><h3>🔧 Stack</h3>');
   h.push('<div style="margin-top:4px">');
-  if(lang) h.push('<span class="topic">' + lang + '</span>');
-  h.push('<span class="topic">' + fwLabel + '</span><span class="topic">SSL</span><span class="topic">CI/CD</span></div></div>');
+  if(lang) h.push('<span class="pv-topic">' + lang + '</span>');
+  h.push('<span class="pv-topic">' + fwLabel + '</span><span class="pv-topic">SSL</span><span class="pv-topic">CI/CD</span></div></div>');
   h.push('</div></div></body></html>');
   return h.join('\n');
 }
