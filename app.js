@@ -729,8 +729,7 @@ async function fetchRepoHTML(site) {
       if (!resp.ok) continue;
       var data = await resp.json();
       if (data.content) {
-        var html = atob(data.content.replace(/
-/g, ''));
+        var html = atob(data.content.replace(/\n/g, ''));
         // Reescribir rutas relativas a raw.githubusercontent.com para que los assets carguen
         var base = 'https://raw.githubusercontent.com/' + repo + '/' + branch + '/';
         html = html.replace(/<head>/i, '<head><base href="' + base + '">');
