@@ -712,26 +712,64 @@ function getSitePreviewUrl(site) {
   return null;
 }
 
+async function fetchRepoHTML(site) {
+  var repo = site.repo || '';
+  var branch = site.repoBranch || 'main';
+  if (!repo) return null;
+  // Archivos entry point a intentar en orden
+  var candidates = ['index.html', 'public/index.html', 'dist/index.html', 'src/index.html', 'build/index.html'];
+  var headers = {};
+  if (githubToken && githubToken !== 'demo_public') {
+    headers['Authorization'] = 'token ' + githubToken;
+  }
+  for (var i = 0; i < candidates.length; i++) {
+    try {
+      var url = 'https://api.github.com/repos/' + repo + '/contents/' + candidates[i] + '?ref=' + branch;
+      var resp = await fetch(url, { headers: headers });
+      if (!resp.ok) continue;
+      var data = await resp.json();
+      if (data.content) {
+        var html = atob(data.content.replace(/
+/g, ''));
+        // Reescribir rutas relativas a raw.githubusercontent.com para que los assets carguen
+        var base = 'https://raw.githubusercontent.com/' + repo + '/' + branch + '/';
+        html = html.replace(/<head>/i, '<head><base href="' + base + '">');
+        return html;
+      }
+    } catch(e) {}
+  }
+  return null;
+}
+
 function loadPreview() {
   var iframe = document.getElementById('preview-iframe');
   var placeholder = document.getElementById('preview-placeholder');
   var urlText = document.getElementById('preview-url-text');
   if (!currentSite) return;
-  var html = buildPreviewHTML(currentSite);
+  if (urlText) urlText.textContent = 'https://' + (currentSite.domain || currentSite.name + '.deployos.app');
+  // Mostrar loading
   iframe.removeAttribute('src');
   iframe.removeAttribute('sandbox');
-  iframe.srcdoc = html;
+  iframe.srcdoc = '<html><body style="background:#0d1117;display:flex;align-items:center;justify-content:center;height:100vh;font-family:system-ui;color:#8b949e;gap:10px"><div style="width:16px;height:16px;border:2px solid #30363d;border-top-color:#58a6ff;border-radius:50%;animation:spin 0.8s linear infinite"></div><span>Cargando sitio...</span><style>@keyframes spin{to{transform:rotate(360deg)}}</style></body></html>';
   iframe.style.display = 'block';
   placeholder.style.display = 'none';
-  if (urlText) urlText.textContent = 'https://' + (currentSite.domain || currentSite.name + '.deployos.app');
+  fetchRepoHTML(currentSite).then(function(html) {
+    if (html) {
+      iframe.srcdoc = html;
+    } else {
+      // Fallback: preview generada
+      iframe.srcdoc = buildPreviewHTML(currentSite);
+    }
+  });
 }
-
 
 function openSiteInNewTab() {
   if (!currentSite) return;
-  var html = buildPreviewHTML(currentSite);
-  var tab = window.open('', '_blank');
-  if (tab) { tab.document.open(); tab.document.write(html); tab.document.close(); }
+  fetchRepoHTML(currentSite).then(function(html) {
+    var content = html || buildPreviewHTML(currentSite);
+    var tab = window.open('', '_blank');
+    if (tab) { tab.document.open(); tab.document.write(content); tab.document.close(); }
+  });
 }
 
 function setPreviewSize(width, height, btn) {
